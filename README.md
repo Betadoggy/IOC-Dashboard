@@ -13,3 +13,11 @@ https://www.python.org/ftp/python/3.12.10/python-3.12.10-amd64.exe
 
 Git 2.53.0.2
 https://github.com/git-for-windows/git/releases/download/v2.53.0.windows.2/Git-2.53.0.2-64-bit.exe
+
+###명령어
+
+templ설치
+go install github.com/a-h/templ/cmd/templ@latest
+
+air 설치
+go install github.com/air-verse/air@latest
