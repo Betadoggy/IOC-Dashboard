@@ -80,8 +80,8 @@ func main() {
 
 		// 3. 신규 데이터 추출 (연도 목록, 히트맵, KPI)
 		availableYears := handlers.GetUniqueYears(allData)
-		heatmap := handlers.GetHeatmapData(filtered)
 		kpis := handlers.GetDashboardKPIs(filtered, allData)
+		heatmap := handlers.GetHeatmapData(filtered)
 
 		// 4. 렌더링
 		return c.Render(http.StatusOK, "", views.Dashboard(
@@ -95,8 +95,8 @@ func main() {
 			fDay,
 			fHour,
 			availableYears,
-			heatmap,
 			kpis,
+			heatmap,
 		))
 	})
 

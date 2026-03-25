@@ -14,7 +14,16 @@ func getModeName(mode string) string {
 
 // fDay 매개변수가 핸들러에서 넘어온다고 가정하고 구조를 유지합니다. 
 // 만약 Dashboard 함수의 시그니처가 다르다면 fDay 부분을 적절히 맞춰주세요.
-templ Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hourly [24]int, currentMode, fYear, fMonth, fDay, fHour string, availableYears []string, heatmap [12][24]int, kpi handlers.DashboardKPIs) {
+templ Dashboard(
+	totalCount int, 
+	data []handlers.CrisisData, 
+	monthly [12]int, 
+	hourly [24]int, 
+	currentMode, 
+	fYear, fMonth, fDay, fHour string, 
+	availableYears []string,
+	kpi handlers.DashboardKPIs,
+	heatmap [12][24]int) {
 	<!DOCTYPE html>
 	<html lang="ko">
 	<head>
@@ -28,7 +37,6 @@ templ Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hou
 			body { font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; background-color: #020617; }
 			.js-plotly-plot .plotly .main-svg { background: transparent !important; }
 			.chart-box { height: 350px !important; width: 100% !important; }
-			.heatmap-box { height: 500px !important; width: 100% !important; }
 		</style>
 	</head>
 	<body class="bg-slate-950 text-slate-200 flex h-screen overflow-hidden">
@@ -150,11 +158,11 @@ templ Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hou
 				</div>
 			</div>
 
-			<div class="bg-slate-900 p-8 rounded-2xl border border-slate-800 shadow-2xl mb-12">
-				<h3 class="font-bold mb-6 text-slate-100 flex items-center">
-					<span class="w-2 h-2 bg-orange-500 rounded-full mr-2 shadow-[0_0_8px_rgba(249,115,22,0.6)]"></span>월별/시간별 집중도 분석
+			<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 mb-8">
+				<h3 class="font-bold mb-4 text-slate-400 flex items-center">
+					<span class="w-1.5 h-1.5 bg-orange-500 rounded-full mr-2"></span>월별-시간대별 분석 히트맵
 				</h3>
-				<div id="heatmap-chart" class="heatmap-box"></div>
+				<div id="heatmap-chart" class="chart-box" style="height: 450px !important;"></div>
 			</div>
 		</main>
 
@@ -163,8 +171,8 @@ templ Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hou
 				setTimeout(function() {
 					const store = document.getElementById('data-store');
 					if (!store) return;
-					const monthlyData = JSON.parse(store.getAttribute('data-monthly'));
-					const hourlyData = JSON.parse(store.getAttribute('data-hourly'));
+					const monthlyData = JSON.parse(store.getAttribute('data-monthly') || '[]');
+					const hourlyData = JSON.parse(store.getAttribute('data-hourly') || '[]');
 					const heatmapData = JSON.parse(store.getAttribute('data-heatmap'));
 
 					const commonLayout = {
@@ -194,15 +202,23 @@ templ Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hou
 						line: { shape: 'spline', color: '#10b981', width: 3 }
 					}], commonLayout, config);
 
-					const heatmapLayout = JSON.parse(JSON.stringify(commonLayout));
-					heatmapLayout.margin.l = 70;
 					Plotly.newPlot('heatmap-chart', [{
+						x: Array.from({length: 24}, (_, i) => i + '시'), // 24 columns
+						y: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'], // 12 rows
 						z: heatmapData,
-						x: Array.from({length: 24}, (_, i) => i + '시'),
-						y: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
 						type: 'heatmap',
-						colorscale: 'Viridis'
-					}], heatmapLayout, config);
+						colorscale: 'Blues',
+						showscale: true,
+						xgap: 1,
+						ygap: 1
+					}], {
+						...commonLayout,
+						yaxis: { 
+							...commonLayout.yaxis, 
+							type: 'category', 
+							autorange: 'reversed' 
+						}
+					}, config);
 
 					window.onresize = function() {
 						Plotly.Plots.resize('month-chart');

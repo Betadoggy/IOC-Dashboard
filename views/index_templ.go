@@ -22,7 +22,16 @@ func getModeName(mode string) string {
 
 // fDay 매개변수가 핸들러에서 넘어온다고 가정하고 구조를 유지합니다.
 // 만약 Dashboard 함수의 시그니처가 다르다면 fDay 부분을 적절히 맞춰주세요.
-func Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hourly [24]int, currentMode, fYear, fMonth, fDay, fHour string, availableYears []string, heatmap [12][24]int, kpi handlers.DashboardKPIs) templ.Component {
+func Dashboard(
+	totalCount int,
+	data []handlers.CrisisData,
+	monthly [12]int,
+	hourly [24]int,
+	currentMode,
+	fYear, fMonth, fDay, fHour string,
+	availableYears []string,
+	kpi handlers.DashboardKPIs,
+	heatmap [12][24]int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -43,14 +52,14 @@ func Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hour
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"ko\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>IOC 통합 분석 대시보드</title><script src=\"https://cdn.plot.ly/plotly-2.27.0.min.js\"></script><script src=\"https://cdn.tailwindcss.com\"></script><style>\r\n\t\t\t@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');\r\n\t\t\tbody { font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; background-color: #020617; }\r\n\t\t\t.js-plotly-plot .plotly .main-svg { background: transparent !important; }\r\n\t\t\t.chart-box { height: 350px !important; width: 100% !important; }\r\n\t\t\t.heatmap-box { height: 500px !important; width: 100% !important; }\r\n\t\t</style></head><body class=\"bg-slate-950 text-slate-200 flex h-screen overflow-hidden\"><div id=\"data-store\" data-monthly=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"ko\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>IOC 통합 분석 대시보드</title><script src=\"https://cdn.plot.ly/plotly-2.27.0.min.js\"></script><script src=\"https://cdn.tailwindcss.com\"></script><style>\r\n\t\t\t@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');\r\n\t\t\tbody { font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; background-color: #020617; }\r\n\t\t\t.js-plotly-plot .plotly .main-svg { background: transparent !important; }\r\n\t\t\t.chart-box { height: 350px !important; width: 100% !important; }\r\n\t\t</style></head><body class=\"bg-slate-950 text-slate-200 flex h-screen overflow-hidden\"><div id=\"data-store\" data-monthly=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(templ.JSONString(monthly))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 36, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 44, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -63,7 +72,7 @@ func Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hour
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(templ.JSONString(hourly))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 37, Col: 42}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 45, Col: 42}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -76,7 +85,7 @@ func Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hour
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(templ.JSONString(heatmap))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 38, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 46, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -98,7 +107,7 @@ func Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hour
 		var templ_7745c5c3_Var6 templ.SafeURL
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/?mode=situation"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 49, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 57, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -133,7 +142,7 @@ func Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hour
 		var templ_7745c5c3_Var9 templ.SafeURL
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/?mode=event"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 50, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 58, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -159,7 +168,7 @@ func Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hour
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(currentMode)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 57, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 65, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -177,7 +186,7 @@ func Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hour
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(y)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 64, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 72, Col: 26}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -200,7 +209,7 @@ func Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hour
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(y)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 64, Col: 57}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 72, Col: 57}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -223,7 +232,7 @@ func Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hour
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 74, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 82, Col: 40}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -246,7 +255,7 @@ func Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hour
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 74, Col: 100}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 82, Col: 100}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -269,7 +278,7 @@ func Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hour
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 84, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 92, Col: 40}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
@@ -292,7 +301,7 @@ func Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hour
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 84, Col: 98}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 92, Col: 98}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -315,7 +324,7 @@ func Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hour
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 94, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 102, Col: 40}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -338,7 +347,7 @@ func Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hour
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 94, Col: 99}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 102, Col: 99}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
@@ -356,7 +365,7 @@ func Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hour
 		var templ_7745c5c3_Var20 templ.SafeURL
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/?mode=" + currentMode))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 100, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 108, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -369,7 +378,7 @@ func Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hour
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(getModeName(currentMode))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 109, Col: 98}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 117, Col: 98}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -382,7 +391,7 @@ func Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hour
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(kpi.TotalCount))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 115, Col: 82}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 123, Col: 82}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -396,7 +405,7 @@ func Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hour
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(kpi.PeakHour))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 121, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 129, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 			if templ_7745c5c3_Err != nil {
@@ -419,13 +428,13 @@ func Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hour
 		var templ_7745c5c3_Var24 string
 		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(kpi.TopType)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 130, Col: 72}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 138, Col: 72}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "</p></div><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800 border-t-4 border-t-purple-500 shadow-xl\"><p class=\"text-[11px] text-slate-400 font-bold uppercase tracking-widest\">Status</p><p class=\"text-lg font-bold text-white mt-3 italic text-purple-400\">Optimized</p></div></div><div class=\"grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8\"><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800\"><h3 class=\"font-bold mb-4 text-slate-400 flex items-center\"><span class=\"w-1.5 h-1.5 bg-blue-500 rounded-full mr-2\"></span>월별 발생 추이</h3><div id=\"month-chart\" class=\"chart-box\"></div></div><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800\"><h3 class=\"font-bold mb-4 text-slate-400 flex items-center\"><span class=\"w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2\"></span>시간대별 밀도</h3><div id=\"hour-chart\" class=\"chart-box\"></div></div></div><div class=\"bg-slate-900 p-8 rounded-2xl border border-slate-800 shadow-2xl mb-12\"><h3 class=\"font-bold mb-6 text-slate-100 flex items-center\"><span class=\"w-2 h-2 bg-orange-500 rounded-full mr-2 shadow-[0_0_8px_rgba(249,115,22,0.6)]\"></span>월별/시간별 집중도 분석</h3><div id=\"heatmap-chart\" class=\"heatmap-box\"></div></div></main><script>\r\n\t\t\twindow.addEventListener('load', function() {\r\n\t\t\t\tsetTimeout(function() {\r\n\t\t\t\t\tconst store = document.getElementById('data-store');\r\n\t\t\t\t\tif (!store) return;\r\n\t\t\t\t\tconst monthlyData = JSON.parse(store.getAttribute('data-monthly'));\r\n\t\t\t\t\tconst hourlyData = JSON.parse(store.getAttribute('data-hourly'));\r\n\t\t\t\t\tconst heatmapData = JSON.parse(store.getAttribute('data-heatmap'));\r\n\r\n\t\t\t\t\tconst commonLayout = {\r\n\t\t\t\t\t\tautosize: true,\r\n\t\t\t\t\t\tpaper_bgcolor: 'rgba(0,0,0,0)',\r\n\t\t\t\t\t\tplot_bgcolor: 'rgba(0,0,0,0)',\r\n\t\t\t\t\t\tfont: { color: '#94a3b8', family: 'Pretendard' },\r\n\t\t\t\t\t\tmargin: { t: 30, r: 30, l: 50, b: 50 },\r\n\t\t\t\t\t\txaxis: { gridcolor: '#1e293b', zeroline: false },\r\n\t\t\t\t\t\tyaxis: { gridcolor: '#1e293b', zeroline: false }\r\n\t\t\t\t\t};\r\n\t\t\t\t\tconst config = { responsive: true, displayModeBar: false };\r\n\r\n\t\t\t\t\tPlotly.newPlot('month-chart', [{\r\n\t\t\t\t\t\tx: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],\r\n\t\t\t\t\t\ty: monthlyData,\r\n\t\t\t\t\t\ttype: 'bar',\r\n\t\t\t\t\t\tmarker: { color: '#3B82F6' }\r\n\t\t\t\t\t}], commonLayout, config);\r\n\r\n\t\t\t\t\tPlotly.newPlot('hour-chart', [{\r\n\t\t\t\t\t\tx: Array.from({length: 24}, (_, i) => i + '시'),\r\n\t\t\t\t\t\ty: hourlyData,\r\n\t\t\t\t\t\ttype: 'scatter',\r\n\t\t\t\t\t\tmode: 'lines+markers',\r\n\t\t\t\t\t\tfill: 'tozeroy',\r\n\t\t\t\t\t\tline: { shape: 'spline', color: '#10b981', width: 3 }\r\n\t\t\t\t\t}], commonLayout, config);\r\n\r\n\t\t\t\t\tconst heatmapLayout = JSON.parse(JSON.stringify(commonLayout));\r\n\t\t\t\t\theatmapLayout.margin.l = 70;\r\n\t\t\t\t\tPlotly.newPlot('heatmap-chart', [{\r\n\t\t\t\t\t\tz: heatmapData,\r\n\t\t\t\t\t\tx: Array.from({length: 24}, (_, i) => i + '시'),\r\n\t\t\t\t\t\ty: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],\r\n\t\t\t\t\t\ttype: 'heatmap',\r\n\t\t\t\t\t\tcolorscale: 'Viridis'\r\n\t\t\t\t\t}], heatmapLayout, config);\r\n\r\n\t\t\t\t\twindow.onresize = function() {\r\n\t\t\t\t\t\tPlotly.Plots.resize('month-chart');\r\n\t\t\t\t\t\tPlotly.Plots.resize('hour-chart');\r\n\t\t\t\t\t\tPlotly.Plots.resize('heatmap-chart');\r\n\t\t\t\t\t};\r\n\t\t\t\t}, 200);\r\n\t\t\t});\r\n\t\t</script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "</p></div><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800 border-t-4 border-t-purple-500 shadow-xl\"><p class=\"text-[11px] text-slate-400 font-bold uppercase tracking-widest\">Status</p><p class=\"text-lg font-bold text-white mt-3 italic text-purple-400\">Optimized</p></div></div><div class=\"grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8\"><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800\"><h3 class=\"font-bold mb-4 text-slate-400 flex items-center\"><span class=\"w-1.5 h-1.5 bg-blue-500 rounded-full mr-2\"></span>월별 발생 추이</h3><div id=\"month-chart\" class=\"chart-box\"></div></div><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800\"><h3 class=\"font-bold mb-4 text-slate-400 flex items-center\"><span class=\"w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2\"></span>시간대별 밀도</h3><div id=\"hour-chart\" class=\"chart-box\"></div></div></div><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800 mb-8\"><h3 class=\"font-bold mb-4 text-slate-400 flex items-center\"><span class=\"w-1.5 h-1.5 bg-orange-500 rounded-full mr-2\"></span>월별-시간대별 분석 히트맵</h3><div id=\"heatmap-chart\" class=\"chart-box\" style=\"height: 450px !important;\"></div></div></main><script>\r\n\t\t\twindow.addEventListener('load', function() {\r\n\t\t\t\tsetTimeout(function() {\r\n\t\t\t\t\tconst store = document.getElementById('data-store');\r\n\t\t\t\t\tif (!store) return;\r\n\t\t\t\t\tconst monthlyData = JSON.parse(store.getAttribute('data-monthly') || '[]');\r\n\t\t\t\t\tconst hourlyData = JSON.parse(store.getAttribute('data-hourly') || '[]');\r\n\t\t\t\t\tconst heatmapData = JSON.parse(store.getAttribute('data-heatmap'));\r\n\r\n\t\t\t\t\tconst commonLayout = {\r\n\t\t\t\t\t\tautosize: true,\r\n\t\t\t\t\t\tpaper_bgcolor: 'rgba(0,0,0,0)',\r\n\t\t\t\t\t\tplot_bgcolor: 'rgba(0,0,0,0)',\r\n\t\t\t\t\t\tfont: { color: '#94a3b8', family: 'Pretendard' },\r\n\t\t\t\t\t\tmargin: { t: 30, r: 30, l: 50, b: 50 },\r\n\t\t\t\t\t\txaxis: { gridcolor: '#1e293b', zeroline: false },\r\n\t\t\t\t\t\tyaxis: { gridcolor: '#1e293b', zeroline: false }\r\n\t\t\t\t\t};\r\n\t\t\t\t\tconst config = { responsive: true, displayModeBar: false };\r\n\r\n\t\t\t\t\tPlotly.newPlot('month-chart', [{\r\n\t\t\t\t\t\tx: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],\r\n\t\t\t\t\t\ty: monthlyData,\r\n\t\t\t\t\t\ttype: 'bar',\r\n\t\t\t\t\t\tmarker: { color: '#3B82F6' }\r\n\t\t\t\t\t}], commonLayout, config);\r\n\r\n\t\t\t\t\tPlotly.newPlot('hour-chart', [{\r\n\t\t\t\t\t\tx: Array.from({length: 24}, (_, i) => i + '시'),\r\n\t\t\t\t\t\ty: hourlyData,\r\n\t\t\t\t\t\ttype: 'scatter',\r\n\t\t\t\t\t\tmode: 'lines+markers',\r\n\t\t\t\t\t\tfill: 'tozeroy',\r\n\t\t\t\t\t\tline: { shape: 'spline', color: '#10b981', width: 3 }\r\n\t\t\t\t\t}], commonLayout, config);\r\n\r\n\t\t\t\t\tPlotly.newPlot('heatmap-chart', [{\r\n\t\t\t\t\t\tx: Array.from({length: 24}, (_, i) => i + '시'), // 24 columns\r\n\t\t\t\t\t\ty: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'], // 12 rows\r\n\t\t\t\t\t\tz: heatmapData,\r\n\t\t\t\t\t\ttype: 'heatmap',\r\n\t\t\t\t\t\tcolorscale: 'Blues',\r\n\t\t\t\t\t\tshowscale: true,\r\n\t\t\t\t\t\txgap: 1,\r\n\t\t\t\t\t\tygap: 1\r\n\t\t\t\t\t}], {\r\n\t\t\t\t\t\t...commonLayout,\r\n\t\t\t\t\t\tyaxis: { \r\n\t\t\t\t\t\t\t...commonLayout.yaxis, \r\n\t\t\t\t\t\t\ttype: 'category', \r\n\t\t\t\t\t\t\tautorange: 'reversed' \r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}, config);\r\n\r\n\t\t\t\t\twindow.onresize = function() {\r\n\t\t\t\t\t\tPlotly.Plots.resize('month-chart');\r\n\t\t\t\t\t\tPlotly.Plots.resize('hour-chart');\r\n\t\t\t\t\t\tPlotly.Plots.resize('heatmap-chart');\r\n\t\t\t\t\t};\r\n\t\t\t\t}, 200);\r\n\t\t\t});\r\n\t\t</script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
