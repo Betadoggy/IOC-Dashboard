@@ -1,0 +1,217 @@
+package views
+
+import (
+	"strconv"
+	"IOC-Dashboard/handlers"
+)
+
+func getModeName(mode string) string {
+	if mode == "event" {
+		return "이벤트"
+	}
+	return "상황"
+}
+
+// fDay 매개변수가 핸들러에서 넘어온다고 가정하고 구조를 유지합니다. 
+// 만약 Dashboard 함수의 시그니처가 다르다면 fDay 부분을 적절히 맞춰주세요.
+templ Dashboard(totalCount int, data []handlers.CrisisData, monthly [12]int, hourly [24]int, currentMode, fYear, fMonth, fDay, fHour string, availableYears []string, heatmap [12][24]int, kpi handlers.DashboardKPIs) {
+	<!DOCTYPE html>
+	<html lang="ko">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<title>IOC 통합 분석 대시보드</title>
+		<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<style>
+			@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+			body { font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; background-color: #020617; }
+			.js-plotly-plot .plotly .main-svg { background: transparent !important; }
+			.chart-box { height: 350px !important; width: 100% !important; }
+			.heatmap-box { height: 500px !important; width: 100% !important; }
+		</style>
+	</head>
+	<body class="bg-slate-950 text-slate-200 flex h-screen overflow-hidden">
+		<div id="data-store" 
+			 data-monthly={ templ.JSONString(monthly) } 
+			 data-hourly={ templ.JSONString(hourly) }
+			 data-heatmap={ templ.JSONString(heatmap) }
+			 style="display: none;"></div>
+
+		<aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 shadow-2xl">
+			<div class="p-6 border-b border-slate-800 text-center">
+				<h2 class="text-xl font-black text-white italic tracking-tighter">IOC ANALYTICS</h2>
+			</div>
+			<nav class="flex-1 p-4 space-y-6 overflow-y-auto">
+				<section>
+					<p class="px-2 text-[10px] font-bold text-slate-500 uppercase mb-3 text-center">분석 대상</p>
+					<div class="grid grid-cols-2 gap-2">
+						<a href={ templ.URL("/?mode=situation") } class={ "text-center py-2 rounded-lg text-xs font-bold transition-all ", templ.KV("bg-blue-600 text-white shadow-lg", currentMode == "situation"), templ.KV("bg-slate-800 text-slate-400", currentMode != "situation") }>상황</a>
+						<a href={ templ.URL("/?mode=event") } class={ "text-center py-2 rounded-lg text-xs font-bold transition-all ", templ.KV("bg-blue-600 text-white shadow-lg", currentMode == "event"), templ.KV("bg-slate-800 text-slate-400", currentMode != "event") }>이벤트</a>
+					</div>
+				</section>
+
+				<section class="space-y-4">
+					<p class="px-2 text-[10px] font-bold text-slate-500 uppercase mb-3">데이터 필터</p>
+					<form method="GET" action="/" class="space-y-4">
+						<input type="hidden" name="mode" value={ currentMode } />
+						
+						<div>
+							<label class="text-[11px] text-slate-500 ml-1 mb-1 block">연도 (Year)</label>
+							<select name="year" onchange="this.form.submit()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 outline-none focus:border-blue-500">
+								<option value="">전체 연도</option>
+								for _, y := range availableYears {
+									<option value={ y } selected?={ fYear == y }>{ y }년</option>
+								}
+							</select>
+						</div>
+
+						<div>
+							<label class="text-[11px] text-slate-500 ml-1 mb-1 block">월 (Month)</label>
+							<select name="month" onchange="this.form.submit()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 outline-none focus:border-blue-500">
+								<option value="">전체 월</option>
+								for i := 1; i <= 12; i++ {
+									<option value={ strconv.Itoa(i) } selected?={ fMonth == strconv.Itoa(i) }>{ strconv.Itoa(i) }월</option>
+								}
+							</select>
+						</div>
+
+						<div>
+							<label class="text-[11px] text-slate-500 ml-1 mb-1 block">일 (Day)</label>
+							<select name="day" onchange="this.form.submit()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 outline-none focus:border-blue-500">
+								<option value="">전체 일</option>
+								for i := 1; i <= 31; i++ {
+									<option value={ strconv.Itoa(i) } selected?={ fDay == strconv.Itoa(i) }>{ strconv.Itoa(i) }일</option>
+								}
+							</select>
+						</div>
+
+						<div>
+							<label class="text-[11px] text-slate-500 ml-1 mb-1 block">시간 (Hour)</label>
+							<select name="hour" onchange="this.form.submit()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 outline-none focus:border-blue-500">
+								<option value="">전체 시간</option>
+								for i := 0; i <= 23; i++ {
+									<option value={ strconv.Itoa(i) } selected?={ fHour == strconv.Itoa(i) }>{ strconv.Itoa(i) }시</option>
+								}
+							</select>
+						</div>
+
+						<div class="pt-2 text-center border-t border-slate-800 mt-4">
+							<a href={ templ.URL("/?mode=" + currentMode) } class="text-[10px] text-slate-500 hover:text-blue-500 underline transition-colors">필터 초기화</a>
+						</div>
+					</form>
+				</section>
+			</nav>
+		</aside>
+
+		<main class="flex-1 overflow-y-auto p-8 bg-slate-950/50">
+            <header class="mb-10">
+				<h1 class="text-3xl font-black text-white uppercase tracking-tight">{ getModeName(currentMode) } 통합 분석</h1>
+			</header>
+
+			<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10 text-center">
+				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 border-t-4 border-t-blue-500 shadow-xl">
+					<p class="text-[11px] text-slate-400 font-bold uppercase tracking-widest">Total Events</p>
+					<p class="text-4xl font-black text-white mt-2">{ strconv.Itoa(kpi.TotalCount) }<span class="text-sm ml-1 text-slate-500">건</span></p>
+				</div>
+				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 border-t-4 border-t-orange-500 shadow-xl">
+					<p class="text-[11px] text-slate-400 font-bold uppercase tracking-widest">Peak Hour</p>
+					<div class="text-4xl font-black text-white mt-2">
+						if kpi.PeakHour != -1 {
+							{ strconv.Itoa(kpi.PeakHour) }
+						} else {
+							-
+						}
+						<span class="text-sm ml-1 text-slate-500">시</span>
+					</div>
+				</div>
+				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 border-t-4 border-t-emerald-500 shadow-xl overflow-hidden text-ellipsis">
+					<p class="text-[11px] text-slate-400 font-bold uppercase tracking-widest">Top Category</p>
+					<p class="text-lg font-bold text-white mt-3 truncate">{ kpi.TopType }</p>
+				</div>
+				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 border-t-4 border-t-purple-500 shadow-xl">
+					<p class="text-[11px] text-slate-400 font-bold uppercase tracking-widest">Status</p>
+					<p class="text-lg font-bold text-white mt-3 italic text-purple-400">Optimized</p>
+				</div>
+			</div>
+
+			<div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
+					<h3 class="font-bold mb-4 text-slate-400 flex items-center">
+						<span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></span>월별 발생 추이
+					</h3>
+					<div id="month-chart" class="chart-box"></div>
+				</div>
+				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
+					<h3 class="font-bold mb-4 text-slate-400 flex items-center">
+						<span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2"></span>시간대별 밀도
+					</h3>
+					<div id="hour-chart" class="chart-box"></div>
+				</div>
+			</div>
+
+			<div class="bg-slate-900 p-8 rounded-2xl border border-slate-800 shadow-2xl mb-12">
+				<h3 class="font-bold mb-6 text-slate-100 flex items-center">
+					<span class="w-2 h-2 bg-orange-500 rounded-full mr-2 shadow-[0_0_8px_rgba(249,115,22,0.6)]"></span>월별/시간별 집중도 분석
+				</h3>
+				<div id="heatmap-chart" class="heatmap-box"></div>
+			</div>
+		</main>
+
+		<script>
+			window.addEventListener('load', function() {
+				setTimeout(function() {
+					const store = document.getElementById('data-store');
+					if (!store) return;
+					const monthlyData = JSON.parse(store.getAttribute('data-monthly'));
+					const hourlyData = JSON.parse(store.getAttribute('data-hourly'));
+					const heatmapData = JSON.parse(store.getAttribute('data-heatmap'));
+
+					const commonLayout = {
+						autosize: true,
+						paper_bgcolor: 'rgba(0,0,0,0)',
+						plot_bgcolor: 'rgba(0,0,0,0)',
+						font: { color: '#94a3b8', family: 'Pretendard' },
+						margin: { t: 30, r: 30, l: 50, b: 50 },
+						xaxis: { gridcolor: '#1e293b', zeroline: false },
+						yaxis: { gridcolor: '#1e293b', zeroline: false }
+					};
+					const config = { responsive: true, displayModeBar: false };
+
+					Plotly.newPlot('month-chart', [{
+						x: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+						y: monthlyData,
+						type: 'bar',
+						marker: { color: '#3B82F6' }
+					}], commonLayout, config);
+
+					Plotly.newPlot('hour-chart', [{
+						x: Array.from({length: 24}, (_, i) => i + '시'),
+						y: hourlyData,
+						type: 'scatter',
+						mode: 'lines+markers',
+						fill: 'tozeroy',
+						line: { shape: 'spline', color: '#10b981', width: 3 }
+					}], commonLayout, config);
+
+					const heatmapLayout = JSON.parse(JSON.stringify(commonLayout));
+					heatmapLayout.margin.l = 70;
+					Plotly.newPlot('heatmap-chart', [{
+						z: heatmapData,
+						x: Array.from({length: 24}, (_, i) => i + '시'),
+						y: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+						type: 'heatmap',
+						colorscale: 'Viridis'
+					}], heatmapLayout, config);
+
+					window.onresize = function() {
+						Plotly.Plots.resize('month-chart');
+						Plotly.Plots.resize('hour-chart');
+						Plotly.Plots.resize('heatmap-chart');
+					};
+				}, 200);
+			});
+		</script>
+	</body>
+	</html>
+}
