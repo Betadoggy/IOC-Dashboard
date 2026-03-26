@@ -10,14 +10,16 @@ import (
 
 // 1. 구조체 정의 (다른 파일에서도 쓰이도록 대문자로 시작)
 type CrisisData struct {
-	Timestamp string
-	Year      int
-	Month     int
-	Day       int
-	Hour      int
-	Type      string
-	TypeMain  string
-	Location  string
+	Timestamp  string
+	ResolvedAt string
+	Severity   string
+	Year       int
+	Month      int
+	Day        int
+	Hour       int
+	Type       string
+	TypeMain   string
+	Location   string
 }
 
 func LoadExcel(path string) ([]CrisisData, error) {
@@ -46,30 +48,39 @@ func LoadExcel(path string) ([]CrisisData, error) {
 				continue
 			}
 
-			rawTime := row[2]
+			rawTime := strings.TrimSpace(row[2])
 			t, err := parseFlexTime(rawTime)
 			if err != nil {
 				continue
 			}
 
-			// 계층 분리
 			typeParts := strings.Split(row[8], ">")
-			// locParts := strings.Split(row[10], ">") // 에러 원인: 선언 후 미사용 -> 삭제하거나 아래처럼 활용
-
 			typeMain := ""
 			if len(typeParts) > 0 {
 				typeMain = strings.TrimSpace(typeParts[0])
 			}
 
+			rawResolved := ""
+			if len(row) > 3 {
+				rawResolved = strings.TrimSpace(row[3])
+			}
+
+			severity := ""
+			if len(row) > 6 {
+				severity = strings.TrimSpace(row[6])
+			}
+
 			allData = append(allData, CrisisData{
-				Timestamp: rawTime,
-				Year:      t.Year(),
-				Month:     int(t.Month()),
-				Day:       t.Day(),
-				Hour:      t.Hour(),
-				Type:      row[8],
-				TypeMain:  typeMain,
-				Location:  row[10], // row[10] 자체를 사용
+				Timestamp:  rawTime,
+				ResolvedAt: rawResolved,
+				Severity:   severity,
+				Year:       t.Year(),
+				Month:      int(t.Month()),
+				Day:        t.Day(),
+				Hour:       t.Hour(),
+				Type:       row[8],
+				TypeMain:   typeMain,
+				Location:   row[10], // row[10] 자체를 사용
 			})
 		}
 	}

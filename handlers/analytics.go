@@ -5,29 +5,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
-
-// 월별 집계
-func GetMonthlyCounts(data []CrisisData) [12]int {
-	var counts [12]int
-	for _, item := range data {
-		if item.Month >= 1 && item.Month <= 12 {
-			counts[item.Month-1]++
-		}
-	}
-	return counts
-}
-
-// 시간대별 집계
-func GetHourlyCounts(data []CrisisData) [24]int {
-	var counts [24]int
-	for _, item := range data {
-		if item.Hour >= 0 && item.Hour <= 23 {
-			counts[item.Hour]++
-		}
-	}
-	return counts
-}
 
 // 연도 목록 추출
 func GetUniqueYears(data []CrisisData) []string {
@@ -49,22 +28,12 @@ func GetUniqueYears(data []CrisisData) []string {
 	return result
 }
 
-// 히트맵 데이터 추출
-func GetHeatmapData(data []CrisisData) [12][24]int {
-	var heatmap [12][24]int
-	for _, item := range data {
-		if item.Month >= 1 && item.Month <= 12 && item.Hour >= 0 && item.Hour <= 23 {
-			heatmap[item.Month-1][item.Hour]++
-		}
-	}
-	return heatmap
-}
-
-// 일별 통합 통계: 월별, 시간별, 히트맵을 한 번에 수집해 루프를 줄입니다.
-func GetAggregateStats(data []CrisisData) ([12]int, [24]int, [12][24]int) {
+// 통합 통계: 월별, 시간별, 히트맵을 한 번에 수집해 루프를 줄입니다.
+func GetAggregateStats(data []CrisisData) ([12]int, [24]int, [12][24]int, [7][24]int) {
 	var monthly [12]int
 	var hourly [24]int
 	var heatmap [12][24]int
+	var weekdayHeatmap [7][24]int
 	for _, item := range data {
 		if item.Month >= 1 && item.Month <= 12 {
 			monthly[item.Month-1]++
@@ -75,8 +44,12 @@ func GetAggregateStats(data []CrisisData) ([12]int, [24]int, [12][24]int) {
 		if item.Month >= 1 && item.Month <= 12 && item.Hour >= 0 && item.Hour <= 23 {
 			heatmap[item.Month-1][item.Hour]++
 		}
+		if item.Year > 0 && item.Month >= 1 && item.Month <= 12 && item.Day >= 1 && item.Hour >= 0 && item.Hour <= 23 {
+			wd := int(time.Date(item.Year, time.Month(item.Month), item.Day, 0, 0, 0, 0, time.UTC).Weekday())
+			weekdayHeatmap[wd][item.Hour]++
+		}
 	}
-	return monthly, hourly, heatmap
+	return monthly, hourly, heatmap, weekdayHeatmap
 }
 
 // KPI 계산 (구조체 및 함수)
@@ -85,10 +58,19 @@ type DashboardKPIs struct {
 	DailyAverage float64
 	PeakHour     int
 	TopType      string
+	MTTRByType   map[string]float64
+	LTIDays      float64
 }
 
 func GetDashboardKPIs(filtered []CrisisData, allData []CrisisData) DashboardKPIs {
-	kpi := DashboardKPIs{TotalCount: len(filtered), DailyAverage: 0.0, PeakHour: -1, TopType: "N/A"}
+	kpi := DashboardKPIs{
+		TotalCount:   len(filtered),
+		DailyAverage: 0.0,
+		PeakHour:     -1,
+		TopType:      "N/A",
+		MTTRByType:   map[string]float64{},
+		LTIDays:      -1,
+	}
 	if len(filtered) == 0 {
 		return kpi
 	}
@@ -98,6 +80,8 @@ func GetDashboardKPIs(filtered []CrisisData, allData []CrisisData) DashboardKPIs
 	tCounts := make(map[string]int)
 	maxT, maxTC := "", 0
 	uniqueDays := make(map[string]bool)
+	mttrSumByType := make(map[string]float64)
+	mttrCountByType := make(map[string]int)
 
 	for _, d := range filtered {
 		hCounts[d.Hour]++
@@ -114,12 +98,54 @@ func GetDashboardKPIs(filtered []CrisisData, allData []CrisisData) DashboardKPIs
 		}
 		dateKey := fmt.Sprintf("%d-%02d-%02d", d.Year, d.Month, d.Day)
 		uniqueDays[dateKey] = true
+
+		occurredAt, errOccurred := parseFlexTime(d.Timestamp)
+		resolvedRaw := d.ResolvedAt
+		if errOccurred == nil && resolvedRaw != "" {
+			resolvedAt, errResolved := parseFlexTime(resolvedRaw)
+			if errResolved == nil && !resolvedAt.Before(occurredAt) {
+				hours := resolvedAt.Sub(occurredAt).Hours()
+				typeKey := d.TypeMain
+				if typeKey == "" {
+					typeKey = "기타"
+				}
+				mttrSumByType[typeKey] += hours
+				mttrCountByType[typeKey]++
+			}
+		}
 	}
 	kpi.PeakHour = maxH
 	kpi.TopType = maxT
 	if len(uniqueDays) > 0 {
 		kpi.DailyAverage = float64(len(filtered)) / float64(len(uniqueDays))
 	}
+
+	for typeKey, sum := range mttrSumByType {
+		count := mttrCountByType[typeKey]
+		if count > 0 {
+			kpi.MTTRByType[typeKey] = sum / float64(count)
+		}
+	}
+
+	now := time.Now()
+	var lastSevere *time.Time
+	for _, d := range allData {
+		if d.Severity != "심각" {
+			continue
+		}
+		occurredAt, err := parseFlexTime(d.Timestamp)
+		if err != nil {
+			continue
+		}
+		if lastSevere == nil || occurredAt.After(*lastSevere) {
+			t := occurredAt
+			lastSevere = &t
+		}
+	}
+	if lastSevere != nil && now.After(*lastSevere) {
+		kpi.LTIDays = now.Sub(*lastSevere).Hours() / 24.0
+	}
+
 	return kpi
 }
 
