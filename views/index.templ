@@ -1,6 +1,7 @@
 package views
 
 import (
+	"fmt"
 	"strconv"
 	"IOC-Dashboard/handlers"
 )
@@ -23,7 +24,10 @@ templ Dashboard(
 	fYear, fMonth, fDay, fHour string, 
 	availableYears []string,
 	kpi handlers.DashboardKPIs,
-	heatmap [12][24]int) {
+	heatmap [12][24]int,
+	typeLevel, locLevel string,
+	typeAnalysis handlers.TypeAnalysis,
+	locAnalysis handlers.LocationAnalysis) {
 	<!DOCTYPE html>
 	<html lang="ko">
 	<head>
@@ -44,11 +48,13 @@ templ Dashboard(
 			 data-monthly={ templ.JSONString(monthly) } 
 			 data-hourly={ templ.JSONString(hourly) }
 			 data-heatmap={ templ.JSONString(heatmap) }
+			 data-type-analysis={ templ.JSONString(typeAnalysis) }
+			 data-loc-analysis={ templ.JSONString(locAnalysis) }
 			 style="display: none;"></div>
 
 		<aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 shadow-2xl">
 			<div class="p-6 border-b border-slate-800 text-center">
-				<h2 class="text-xl font-black text-white italic tracking-tighter">IOC ANALYTICS</h2>
+				<h2 class="text-xl font-black text-white tracking-tighter">통합분석 대시보드</h2>
 			</div>
 			<nav class="flex-1 p-4 space-y-6 overflow-y-auto">
 				<section>
@@ -119,11 +125,15 @@ templ Dashboard(
 
 			<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10 text-center">
 				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 border-t-4 border-t-blue-500 shadow-xl">
-					<p class="text-[11px] text-slate-400 font-bold uppercase tracking-widest">Total Events</p>
+					<p class="text-[11px] text-slate-400 font-bold uppercase tracking-widest">전체 건수</p>
 					<p class="text-4xl font-black text-white mt-2">{ strconv.Itoa(kpi.TotalCount) }<span class="text-sm ml-1 text-slate-500">건</span></p>
 				</div>
+				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 border-t-4 border-t-purple-500 shadow-xl">
+					<p class="text-[11px] text-slate-400 font-bold uppercase tracking-widest">일 평균 발생</p>
+					<p class="text-4xl font-black text-white mt-2">{ fmt.Sprintf("%.1f", kpi.DailyAverage) }<span class="text-sm ml-1 text-slate-500">건</span></p>
+				</div>
 				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 border-t-4 border-t-orange-500 shadow-xl">
-					<p class="text-[11px] text-slate-400 font-bold uppercase tracking-widest">Peak Hour</p>
+					<p class="text-[11px] text-slate-400 font-bold uppercase tracking-widest">첨두 시간</p>
 					<div class="text-4xl font-black text-white mt-2">
 						if kpi.PeakHour != -1 {
 							{ strconv.Itoa(kpi.PeakHour) }
@@ -134,12 +144,8 @@ templ Dashboard(
 					</div>
 				</div>
 				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 border-t-4 border-t-emerald-500 shadow-xl overflow-hidden text-ellipsis">
-					<p class="text-[11px] text-slate-400 font-bold uppercase tracking-widest">Top Category</p>
-					<p class="text-lg font-bold text-white mt-3 truncate">{ kpi.TopType }</p>
-				</div>
-				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 border-t-4 border-t-purple-500 shadow-xl">
-					<p class="text-[11px] text-slate-400 font-bold uppercase tracking-widest">Status</p>
-					<p class="text-lg font-bold text-white mt-3 italic text-purple-400">Optimized</p>
+					<p class="text-[11px] text-slate-400 font-bold uppercase tracking-widest">최다 발생 유형(대분류)</p>
+					<p class="text-4xl font-black text-white mt-3 truncate">{ kpi.TopType }</p>
 				</div>
 			</div>
 
@@ -152,7 +158,7 @@ templ Dashboard(
 				</div>
 				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
 					<h3 class="font-bold mb-4 text-slate-400 flex items-center">
-						<span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2"></span>시간대별 밀도
+						<span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2"></span>시간대별 추이
 					</h3>
 					<div id="hour-chart" class="chart-box"></div>
 				</div>
@@ -164,6 +170,58 @@ templ Dashboard(
 				</h3>
 				<div id="heatmap-chart" class="chart-box" style="height: 450px !important;"></div>
 			</div>
+
+			<hr class="border-slate-800 mb-8">
+
+			<div class="mb-8">
+				<h2 class="text-2xl font-bold text-white mb-6">유형별 집중 분석</h2>
+				<div class="mb-6">
+					<label class="text-slate-400 font-medium mr-4">분류 단계 (유형):</label>
+					<div class="inline-flex space-x-4">
+						for _, level := range []string{"대분류", "중분류", "소분류"} {
+							<label class="flex items-center">
+								<input type="radio" name="type_level" value={ level } checked?={ typeLevel == level } onchange="updateTypeLevel(this.value)" class="mr-2" />
+								<span class="text-slate-200">{ level }</span>
+							</label>
+						}
+					</div>
+				</div>
+				<div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+					<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
+						<h4 class="font-bold mb-4 text-slate-400">상위 5개 <span id="type-level-text">{ typeLevel }</span></h4>
+						<div id="type-bar-chart" class="chart-box"></div>
+					</div>
+					<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
+						<h4 class="font-bold mb-4 text-slate-400"><span id="type-level-text2">{ typeLevel }</span>별 추이</h4>
+						<div id="type-line-chart" class="chart-box"></div>
+					</div>
+				</div>
+			</div>
+
+			<div class="mb-8">
+				<h2 class="text-2xl font-bold text-white mb-6">위치별 집중 분석</h2>
+				<div class="mb-6">
+					<label class="text-slate-400 font-medium mr-4">분류 단계 (위치):</label>
+					<div class="inline-flex space-x-2">
+						for _, level := range []string{"대분류", "중분류"} {
+							<label class="flex items-center">
+								<input type="radio" name="loc_level" value={ level } checked?={ locLevel == level } onchange="updateLocLevel(this.value)" class="mr-2" />
+								<span class="text-slate-200">{ level }</span>
+							</label>
+						}
+					</div>
+				</div>
+				<div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+					<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
+						<h4 class="font-bold mb-4 text-slate-400">상위 5개 <span id="loc-level-text">{ locLevel }</span></h4>
+						<div id="loc-bar-chart" class="chart-box"></div>
+					</div>
+					<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
+						<h4 class="font-bold mb-4 text-slate-400"><span id="loc-level-text2">{ locLevel }</span>별 추이</h4>
+						<div id="loc-line-chart" class="chart-box"></div>
+					</div>
+				</div>
+			</div>
 		</main>
 
 		<script>
@@ -174,6 +232,8 @@ templ Dashboard(
 					const monthlyData = JSON.parse(store.getAttribute('data-monthly') || '[]');
 					const hourlyData = JSON.parse(store.getAttribute('data-hourly') || '[]');
 					const heatmapData = JSON.parse(store.getAttribute('data-heatmap'));
+					const typeAnalysis = JSON.parse(store.getAttribute('data-type-analysis') || '{}');
+					const locAnalysis = JSON.parse(store.getAttribute('data-loc-analysis') || '{}');
 
 					const commonLayout = {
 						autosize: true,
@@ -189,6 +249,9 @@ templ Dashboard(
 					Plotly.newPlot('month-chart', [{
 						x: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
 						y: monthlyData,
+						text: monthlyData,
+						textposition: 'auto',
+						textfont: { color: '#ffffff', size: 12 },
 						type: 'bar',
 						marker: { color: '#3B82F6' }
 					}], commonLayout, config);
@@ -207,7 +270,7 @@ templ Dashboard(
 						y: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'], // 12 rows
 						z: heatmapData,
 						type: 'heatmap',
-						colorscale: 'Blues',
+						colorscale: 'Reds',
 						showscale: true,
 						xgap: 1,
 						ygap: 1
@@ -220,11 +283,212 @@ templ Dashboard(
 						}
 					}, config);
 
+					// 색 계산 함수
+					function getTypeColors(values) {
+						const max = Math.max(...values);
+						return values.map(v => `hsl(${240 + (v / max) * 60}, 70%, 50%)`); // 보라색에서 파란색으로
+					}
+
+					function getLocColors(values) {
+						const max = Math.max(...values);
+						return values.map(v => `hsl(${30 + (v / max) * 30}, 70%, 50%)`); // 주황색에서 빨간색으로
+					}
+
+					// 유형 바 차트
+					if (typeAnalysis.TopTypes) {
+						const topTypeNames = typeAnalysis.TopTypes.map(t => t.Name);
+						const topTypeCounts = typeAnalysis.TopTypes.map(t => t.Count);
+						const typeColors = getTypeColors(topTypeCounts);
+						Plotly.newPlot('type-bar-chart', [{
+							x: topTypeNames,
+							y: topTypeCounts,
+							text: topTypeCounts,
+							textposition: 'auto',
+							textfont: { color: '#ffffff', size: 12 },
+							type: 'bar',
+							marker: { color: typeColors }
+						}], commonLayout, config);
+					}
+
+					// 유형 라인 차트
+					if (typeAnalysis.TrendData) {
+						const periods = [...new Set(typeAnalysis.TrendData.map(t => t.Period))].sort();
+						const traces = [];
+						const names = [...new Set(typeAnalysis.TrendData.map(t => t.Name))];
+						names.forEach(name => {
+							const data = periods.map(p => {
+								const point = typeAnalysis.TrendData.find(t => t.Period === p && t.Name === name);
+								return point ? point.Count : 0;
+							});
+							traces.push({
+								x: periods,
+								y: data,
+								type: 'scatter',
+								mode: 'lines+markers',
+								name: name,
+								line: { width: 2 }
+							});
+						});
+						Plotly.newPlot('type-line-chart', traces, commonLayout, config);
+					}
+
+					// 위치 바 차트
+					if (locAnalysis.TopLocations) {
+						const topLocNames = locAnalysis.TopLocations.map(l => l.Name);
+						const topLocCounts = locAnalysis.TopLocations.map(l => l.Count);
+						const locColors = getLocColors(topLocCounts);
+						Plotly.newPlot('loc-bar-chart', [{
+							x: topLocNames,
+							y: topLocCounts,
+							text: topLocCounts,
+							textposition: 'auto',
+							textfont: { color: '#ffffff', size: 12 },
+							type: 'bar',
+							marker: { color: locColors }
+						}], commonLayout, config);
+					}
+
+					// 위치 라인 차트
+					if (locAnalysis.TrendData) {
+						const periods = [...new Set(locAnalysis.TrendData.map(t => t.Period))].sort();
+						const traces = [];
+						const names = [...new Set(locAnalysis.TrendData.map(t => t.Name))];
+						names.forEach(name => {
+							const data = periods.map(p => {
+								const point = locAnalysis.TrendData.find(t => t.Period === p && t.Name === name);
+								return point ? point.Count : 0;
+							});
+							traces.push({
+								x: periods,
+								y: data,
+								type: 'scatter',
+								mode: 'lines+markers',
+								name: name,
+								line: { width: 2 }
+							});
+						});
+						Plotly.newPlot('loc-line-chart', traces, commonLayout, config);
+					}
+
 					window.onresize = function() {
 						Plotly.Plots.resize('month-chart');
 						Plotly.Plots.resize('hour-chart');
 						Plotly.Plots.resize('heatmap-chart');
+						Plotly.Plots.resize('type-bar-chart');
+						Plotly.Plots.resize('type-line-chart');
+						Plotly.Plots.resize('loc-bar-chart');
+						Plotly.Plots.resize('loc-line-chart');
 					};
+
+					// 전역 변수로 현재 레벨 저장
+					let currentTypeLevel = '{ typeLevel }';
+					let currentLocLevel = '{ locLevel }';
+
+					// 차트 업데이트 함수
+					function updateTypeCharts(analysis) {
+						if (analysis.TopTypes) {
+							const topTypeNames = analysis.TopTypes.map(t => t.Name);
+							const topTypeCounts = analysis.TopTypes.map(t => t.Count);
+							const typeColors = getTypeColors(topTypeCounts);
+							Plotly.react('type-bar-chart', [{
+								x: topTypeNames,
+								y: topTypeCounts,
+								text: topTypeCounts,
+								textposition: 'auto',
+								textfont: { color: '#ffffff', size: 12 },
+								type: 'bar',
+								marker: { color: typeColors }
+							}], commonLayout, config);
+						}
+
+						if (analysis.TrendData) {
+							const periods = [...new Set(analysis.TrendData.map(t => t.Period))].sort();
+							const traces = [];
+							const names = [...new Set(analysis.TrendData.map(t => t.Name))];
+							names.forEach(name => {
+								const data = periods.map(p => {
+									const point = analysis.TrendData.find(t => t.Period === p && t.Name === name);
+									return point ? point.Count : 0;
+								});
+								traces.push({
+									x: periods,
+									y: data,
+									type: 'scatter',
+									mode: 'lines+markers',
+									name: name,
+									line: { width: 2 }
+								});
+							});
+							Plotly.react('type-line-chart', traces, commonLayout, config);
+						}
+					}
+
+					function updateLocCharts(analysis) {
+						if (analysis.TopLocations) {
+							const topLocNames = analysis.TopLocations.map(l => l.Name);
+							const topLocCounts = analysis.TopLocations.map(l => l.Count);
+							const locColors = getLocColors(topLocCounts);
+							Plotly.react('loc-bar-chart', [{
+								x: topLocNames,
+								y: topLocCounts,
+								text: topLocCounts,
+								textposition: 'auto',
+								textfont: { color: '#ffffff', size: 12 },
+								type: 'bar',
+								marker: { color: locColors }
+							}], commonLayout, config);
+						}
+
+						if (analysis.TrendData) {
+							const periods = [...new Set(analysis.TrendData.map(t => t.Period))].sort();
+							const traces = [];
+							const names = [...new Set(analysis.TrendData.map(t => t.Name))];
+							names.forEach(name => {
+								const data = periods.map(p => {
+									const point = analysis.TrendData.find(t => t.Period === p && t.Name === name);
+									return point ? point.Count : 0;
+								});
+								traces.push({
+									x: periods,
+									y: data,
+									type: 'scatter',
+									mode: 'lines+markers',
+									name: name,
+									line: { width: 2 }
+								});
+							});
+							Plotly.react('loc-line-chart', traces, commonLayout, config);
+						}
+					}
+
+					// 라디오 버튼 변경 함수
+					window.updateTypeLevel = function(level) {
+						currentTypeLevel = level;
+						document.getElementById('type-level-text').textContent = level;
+						document.getElementById('type-level-text2').textContent = level;
+						fetchAnalysis();
+					};
+
+					window.updateLocLevel = function(level) {
+						currentLocLevel = level;
+						document.getElementById('loc-level-text').textContent = level;
+						document.getElementById('loc-level-text2').textContent = level;
+						fetchAnalysis();
+					};
+
+					// API 호출 함수
+					function fetchAnalysis() {
+						const params = new URLSearchParams(window.location.search);
+						params.set('type_level', currentTypeLevel);
+						params.set('loc_level', currentLocLevel);
+						fetch('/api/analysis?' + params.toString())
+							.then(response => response.json())
+							.then(data => {
+								updateTypeCharts(data.typeAnalysis);
+								updateLocCharts(data.locAnalysis);
+							})
+							.catch(error => console.error('Error fetching analysis:', error));
+					}
 				}, 200);
 			});
 		</script>

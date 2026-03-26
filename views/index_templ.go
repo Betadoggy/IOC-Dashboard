@@ -10,6 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"IOC-Dashboard/handlers"
+	"fmt"
 	"strconv"
 )
 
@@ -31,7 +32,10 @@ func Dashboard(
 	fYear, fMonth, fDay, fHour string,
 	availableYears []string,
 	kpi handlers.DashboardKPIs,
-	heatmap [12][24]int) templ.Component {
+	heatmap [12][24]int,
+	typeLevel, locLevel string,
+	typeAnalysis handlers.TypeAnalysis,
+	locAnalysis handlers.LocationAnalysis) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -59,7 +63,7 @@ func Dashboard(
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(templ.JSONString(monthly))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 44, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 48, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -72,7 +76,7 @@ func Dashboard(
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(templ.JSONString(hourly))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 45, Col: 42}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 49, Col: 42}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -85,356 +89,539 @@ func Dashboard(
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(templ.JSONString(heatmap))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 46, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 50, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" style=\"display: none;\"></div><aside class=\"w-64 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 shadow-2xl\"><div class=\"p-6 border-b border-slate-800 text-center\"><h2 class=\"text-xl font-black text-white italic tracking-tighter\">IOC ANALYTICS</h2></div><nav class=\"flex-1 p-4 space-y-6 overflow-y-auto\"><section><p class=\"px-2 text-[10px] font-bold text-slate-500 uppercase mb-3 text-center\">분석 대상</p><div class=\"grid grid-cols-2 gap-2\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" data-type-analysis=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var5 = []any{"text-center py-2 rounded-lg text-xs font-bold transition-all ", templ.KV("bg-blue-600 text-white shadow-lg", currentMode == "situation"), templ.KV("bg-slate-800 text-slate-400", currentMode != "situation")}
-		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var5...)
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(templ.JSONString(typeAnalysis))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 51, Col: 55}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" data-loc-analysis=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var6 templ.SafeURL
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/?mode=situation"))
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(templ.JSONString(locAnalysis))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 57, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 52, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" style=\"display: none;\"></div><aside class=\"w-64 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 shadow-2xl\"><div class=\"p-6 border-b border-slate-800 text-center\"><h2 class=\"text-xl font-black text-white tracking-tighter\">통합분석 대시보드</h2></div><nav class=\"flex-1 p-4 space-y-6 overflow-y-auto\"><section><p class=\"px-2 text-[10px] font-bold text-slate-500 uppercase mb-3 text-center\">분석 대상</p><div class=\"grid grid-cols-2 gap-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var5).String())
+		var templ_7745c5c3_Var7 = []any{"text-center py-2 rounded-lg text-xs font-bold transition-all ", templ.KV("bg-blue-600 text-white shadow-lg", currentMode == "situation"), templ.KV("bg-slate-800 text-slate-400", currentMode != "situation")}
+		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var7...)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<a href=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var8 templ.SafeURL
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/?mode=situation"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 63, Col: 45}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" class=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var9 string
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var7).String())
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 1, Col: 0}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\">상황</a> ")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var8 = []any{"text-center py-2 rounded-lg text-xs font-bold transition-all ", templ.KV("bg-blue-600 text-white shadow-lg", currentMode == "event"), templ.KV("bg-slate-800 text-slate-400", currentMode != "event")}
-		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var8...)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<a href=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var9 templ.SafeURL
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/?mode=event"))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 58, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\">상황</a> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var8).String())
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 1, Col: 0}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+		var templ_7745c5c3_Var10 = []any{"text-center py-2 rounded-lg text-xs font-bold transition-all ", templ.KV("bg-blue-600 text-white shadow-lg", currentMode == "event"), templ.KV("bg-slate-800 text-slate-400", currentMode != "event")}
+		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var10...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\">이벤트</a></div></section><section class=\"space-y-4\"><p class=\"px-2 text-[10px] font-bold text-slate-500 uppercase mb-3\">데이터 필터</p><form method=\"GET\" action=\"/\" class=\"space-y-4\"><input type=\"hidden\" name=\"mode\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var11 string
-		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(currentMode)
+		var templ_7745c5c3_Var11 templ.SafeURL
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/?mode=event"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 65, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 64, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\"><div><label class=\"text-[11px] text-slate-500 ml-1 mb-1 block\">연도 (Year)</label> <select name=\"year\" onchange=\"this.form.submit()\" class=\"w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 outline-none focus:border-blue-500\"><option value=\"\">전체 연도</option> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var12 string
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var10).String())
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 1, Col: 0}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\">이벤트</a></div></section><section class=\"space-y-4\"><p class=\"px-2 text-[10px] font-bold text-slate-500 uppercase mb-3\">데이터 필터</p><form method=\"GET\" action=\"/\" class=\"space-y-4\"><input type=\"hidden\" name=\"mode\" value=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var13 string
+		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(currentMode)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 71, Col: 58}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\"><div><label class=\"text-[11px] text-slate-500 ml-1 mb-1 block\">연도 (Year)</label> <select name=\"year\" onchange=\"this.form.submit()\" class=\"w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 outline-none focus:border-blue-500\"><option value=\"\">전체 연도</option> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for _, y := range availableYears {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<option value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var12 string
-			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(y)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 72, Col: 26}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if fYear == y {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " selected")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, ">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var13 string
-			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(y)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 72, Col: 57}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "년</option>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</select></div><div><label class=\"text-[11px] text-slate-500 ml-1 mb-1 block\">월 (Month)</label> <select name=\"month\" onchange=\"this.form.submit()\" class=\"w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 outline-none focus:border-blue-500\"><option value=\"\">전체 월</option> ")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		for i := 1; i <= 12; i++ {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<option value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<option value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var14 string
-			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(i))
+			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(y)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 82, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 78, Col: 26}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if fMonth == strconv.Itoa(i) {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, " selected")
+			if fYear == y {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, " selected")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, ">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, ">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var15 string
-			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(i))
+			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(y)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 82, Col: 100}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 78, Col: 57}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "월</option>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "년</option>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</select></div><div><label class=\"text-[11px] text-slate-500 ml-1 mb-1 block\">일 (Day)</label> <select name=\"day\" onchange=\"this.form.submit()\" class=\"w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 outline-none focus:border-blue-500\"><option value=\"\">전체 일</option> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</select></div><div><label class=\"text-[11px] text-slate-500 ml-1 mb-1 block\">월 (Month)</label> <select name=\"month\" onchange=\"this.form.submit()\" class=\"w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 outline-none focus:border-blue-500\"><option value=\"\">전체 월</option> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for i := 1; i <= 31; i++ {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<option value=\"")
+		for i := 1; i <= 12; i++ {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<option value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 92, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 88, Col: 40}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if fDay == strconv.Itoa(i) {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, " selected")
+			if fMonth == strconv.Itoa(i) {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, " selected")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, ">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, ">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 92, Col: 98}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 88, Col: 100}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "일</option>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "월</option>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "</select></div><div><label class=\"text-[11px] text-slate-500 ml-1 mb-1 block\">시간 (Hour)</label> <select name=\"hour\" onchange=\"this.form.submit()\" class=\"w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 outline-none focus:border-blue-500\"><option value=\"\">전체 시간</option> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</select></div><div><label class=\"text-[11px] text-slate-500 ml-1 mb-1 block\">일 (Day)</label> <select name=\"day\" onchange=\"this.form.submit()\" class=\"w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 outline-none focus:border-blue-500\"><option value=\"\">전체 일</option> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for i := 0; i <= 23; i++ {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<option value=\"")
+		for i := 1; i <= 31; i++ {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<option value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 102, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 98, Col: 40}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if fHour == strconv.Itoa(i) {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, " selected")
+			if fDay == strconv.Itoa(i) {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, " selected")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, ">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, ">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 102, Col: 99}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 98, Col: 98}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "시</option>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "일</option>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "</select></div><div class=\"pt-2 text-center border-t border-slate-800 mt-4\"><a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "</select></div><div><label class=\"text-[11px] text-slate-500 ml-1 mb-1 block\">시간 (Hour)</label> <select name=\"hour\" onchange=\"this.form.submit()\" class=\"w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 outline-none focus:border-blue-500\"><option value=\"\">전체 시간</option> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var20 templ.SafeURL
-		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/?mode=" + currentMode))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 108, Col: 51}
+		for i := 0; i <= 23; i++ {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<option value=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var20 string
+			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(i))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 108, Col: 40}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if fHour == strconv.Itoa(i) {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, " selected")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, ">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var21 string
+			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(i))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 108, Col: 99}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "시</option>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "</select></div><div class=\"pt-2 text-center border-t border-slate-800 mt-4\"><a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "\" class=\"text-[10px] text-slate-500 hover:text-blue-500 underline transition-colors\">필터 초기화</a></div></form></section></nav></aside><main class=\"flex-1 overflow-y-auto p-8 bg-slate-950/50\"><header class=\"mb-10\"><h1 class=\"text-3xl font-black text-white uppercase tracking-tight\">")
+		var templ_7745c5c3_Var22 templ.SafeURL
+		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL("/?mode=" + currentMode))
 		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var21 string
-		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(getModeName(currentMode))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 117, Col: 98}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, " 통합 분석</h1></header><div class=\"grid grid-cols-1 md:grid-cols-4 gap-6 mb-10 text-center\"><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800 border-t-4 border-t-blue-500 shadow-xl\"><p class=\"text-[11px] text-slate-400 font-bold uppercase tracking-widest\">Total Events</p><p class=\"text-4xl font-black text-white mt-2\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var22 string
-		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(kpi.TotalCount))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 123, Col: 82}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 114, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "<span class=\"text-sm ml-1 text-slate-500\">건</span></p></div><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800 border-t-4 border-t-orange-500 shadow-xl\"><p class=\"text-[11px] text-slate-400 font-bold uppercase tracking-widest\">Peak Hour</p><div class=\"text-4xl font-black text-white mt-2\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "\" class=\"text-[10px] text-slate-500 hover:text-blue-500 underline transition-colors\">필터 초기화</a></div></form></section></nav></aside><main class=\"flex-1 overflow-y-auto p-8 bg-slate-950/50\"><header class=\"mb-10\"><h1 class=\"text-3xl font-black text-white uppercase tracking-tight\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if kpi.PeakHour != -1 {
-			var templ_7745c5c3_Var23 string
-			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(kpi.PeakHour))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 129, Col: 35}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, " ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "- ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		var templ_7745c5c3_Var23 string
+		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(getModeName(currentMode))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 123, Col: 98}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<span class=\"text-sm ml-1 text-slate-500\">시</span></div></div><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800 border-t-4 border-t-emerald-500 shadow-xl overflow-hidden text-ellipsis\"><p class=\"text-[11px] text-slate-400 font-bold uppercase tracking-widest\">Top Category</p><p class=\"text-lg font-bold text-white mt-3 truncate\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, " 통합 분석</h1></header><div class=\"grid grid-cols-1 md:grid-cols-4 gap-6 mb-10 text-center\"><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800 border-t-4 border-t-blue-500 shadow-xl\"><p class=\"text-[11px] text-slate-400 font-bold uppercase tracking-widest\">전체 건수</p><p class=\"text-4xl font-black text-white mt-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var24 string
-		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(kpi.TopType)
+		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(kpi.TotalCount))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 138, Col: 72}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 129, Col: 82}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "</p></div><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800 border-t-4 border-t-purple-500 shadow-xl\"><p class=\"text-[11px] text-slate-400 font-bold uppercase tracking-widest\">Status</p><p class=\"text-lg font-bold text-white mt-3 italic text-purple-400\">Optimized</p></div></div><div class=\"grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8\"><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800\"><h3 class=\"font-bold mb-4 text-slate-400 flex items-center\"><span class=\"w-1.5 h-1.5 bg-blue-500 rounded-full mr-2\"></span>월별 발생 추이</h3><div id=\"month-chart\" class=\"chart-box\"></div></div><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800\"><h3 class=\"font-bold mb-4 text-slate-400 flex items-center\"><span class=\"w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2\"></span>시간대별 밀도</h3><div id=\"hour-chart\" class=\"chart-box\"></div></div></div><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800 mb-8\"><h3 class=\"font-bold mb-4 text-slate-400 flex items-center\"><span class=\"w-1.5 h-1.5 bg-orange-500 rounded-full mr-2\"></span>월별-시간대별 분석 히트맵</h3><div id=\"heatmap-chart\" class=\"chart-box\" style=\"height: 450px !important;\"></div></div></main><script>\r\n\t\t\twindow.addEventListener('load', function() {\r\n\t\t\t\tsetTimeout(function() {\r\n\t\t\t\t\tconst store = document.getElementById('data-store');\r\n\t\t\t\t\tif (!store) return;\r\n\t\t\t\t\tconst monthlyData = JSON.parse(store.getAttribute('data-monthly') || '[]');\r\n\t\t\t\t\tconst hourlyData = JSON.parse(store.getAttribute('data-hourly') || '[]');\r\n\t\t\t\t\tconst heatmapData = JSON.parse(store.getAttribute('data-heatmap'));\r\n\r\n\t\t\t\t\tconst commonLayout = {\r\n\t\t\t\t\t\tautosize: true,\r\n\t\t\t\t\t\tpaper_bgcolor: 'rgba(0,0,0,0)',\r\n\t\t\t\t\t\tplot_bgcolor: 'rgba(0,0,0,0)',\r\n\t\t\t\t\t\tfont: { color: '#94a3b8', family: 'Pretendard' },\r\n\t\t\t\t\t\tmargin: { t: 30, r: 30, l: 50, b: 50 },\r\n\t\t\t\t\t\txaxis: { gridcolor: '#1e293b', zeroline: false },\r\n\t\t\t\t\t\tyaxis: { gridcolor: '#1e293b', zeroline: false }\r\n\t\t\t\t\t};\r\n\t\t\t\t\tconst config = { responsive: true, displayModeBar: false };\r\n\r\n\t\t\t\t\tPlotly.newPlot('month-chart', [{\r\n\t\t\t\t\t\tx: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],\r\n\t\t\t\t\t\ty: monthlyData,\r\n\t\t\t\t\t\ttype: 'bar',\r\n\t\t\t\t\t\tmarker: { color: '#3B82F6' }\r\n\t\t\t\t\t}], commonLayout, config);\r\n\r\n\t\t\t\t\tPlotly.newPlot('hour-chart', [{\r\n\t\t\t\t\t\tx: Array.from({length: 24}, (_, i) => i + '시'),\r\n\t\t\t\t\t\ty: hourlyData,\r\n\t\t\t\t\t\ttype: 'scatter',\r\n\t\t\t\t\t\tmode: 'lines+markers',\r\n\t\t\t\t\t\tfill: 'tozeroy',\r\n\t\t\t\t\t\tline: { shape: 'spline', color: '#10b981', width: 3 }\r\n\t\t\t\t\t}], commonLayout, config);\r\n\r\n\t\t\t\t\tPlotly.newPlot('heatmap-chart', [{\r\n\t\t\t\t\t\tx: Array.from({length: 24}, (_, i) => i + '시'), // 24 columns\r\n\t\t\t\t\t\ty: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'], // 12 rows\r\n\t\t\t\t\t\tz: heatmapData,\r\n\t\t\t\t\t\ttype: 'heatmap',\r\n\t\t\t\t\t\tcolorscale: 'Blues',\r\n\t\t\t\t\t\tshowscale: true,\r\n\t\t\t\t\t\txgap: 1,\r\n\t\t\t\t\t\tygap: 1\r\n\t\t\t\t\t}], {\r\n\t\t\t\t\t\t...commonLayout,\r\n\t\t\t\t\t\tyaxis: { \r\n\t\t\t\t\t\t\t...commonLayout.yaxis, \r\n\t\t\t\t\t\t\ttype: 'category', \r\n\t\t\t\t\t\t\tautorange: 'reversed' \r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}, config);\r\n\r\n\t\t\t\t\twindow.onresize = function() {\r\n\t\t\t\t\t\tPlotly.Plots.resize('month-chart');\r\n\t\t\t\t\t\tPlotly.Plots.resize('hour-chart');\r\n\t\t\t\t\t\tPlotly.Plots.resize('heatmap-chart');\r\n\t\t\t\t\t};\r\n\t\t\t\t}, 200);\r\n\t\t\t});\r\n\t\t</script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "<span class=\"text-sm ml-1 text-slate-500\">건</span></p></div><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800 border-t-4 border-t-purple-500 shadow-xl\"><p class=\"text-[11px] text-slate-400 font-bold uppercase tracking-widest\">일 평균 발생</p><p class=\"text-4xl font-black text-white mt-2\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var25 string
+		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f", kpi.DailyAverage))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 133, Col: 91}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<span class=\"text-sm ml-1 text-slate-500\">건</span></p></div><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800 border-t-4 border-t-orange-500 shadow-xl\"><p class=\"text-[11px] text-slate-400 font-bold uppercase tracking-widest\">첨두 시간</p><div class=\"text-4xl font-black text-white mt-2\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if kpi.PeakHour != -1 {
+			var templ_7745c5c3_Var26 string
+			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(kpi.PeakHour))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 139, Col: 35}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "- ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "<span class=\"text-sm ml-1 text-slate-500\">시</span></div></div><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800 border-t-4 border-t-emerald-500 shadow-xl overflow-hidden text-ellipsis\"><p class=\"text-[11px] text-slate-400 font-bold uppercase tracking-widest\">최다 발생 유형(대분류)</p><p class=\"text-4xl font-black text-white mt-3 truncate\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var27 string
+		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(kpi.TopType)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 148, Col: 74}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "</p></div></div><div class=\"grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8\"><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800\"><h3 class=\"font-bold mb-4 text-slate-400 flex items-center\"><span class=\"w-1.5 h-1.5 bg-blue-500 rounded-full mr-2\"></span>월별 발생 추이</h3><div id=\"month-chart\" class=\"chart-box\"></div></div><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800\"><h3 class=\"font-bold mb-4 text-slate-400 flex items-center\"><span class=\"w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2\"></span>시간대별 추이</h3><div id=\"hour-chart\" class=\"chart-box\"></div></div></div><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800 mb-8\"><h3 class=\"font-bold mb-4 text-slate-400 flex items-center\"><span class=\"w-1.5 h-1.5 bg-orange-500 rounded-full mr-2\"></span>월별-시간대별 분석 히트맵</h3><div id=\"heatmap-chart\" class=\"chart-box\" style=\"height: 450px !important;\"></div></div><hr class=\"border-slate-800 mb-8\"><div class=\"mb-8\"><h2 class=\"text-2xl font-bold text-white mb-6\">유형별 집중 분석</h2><div class=\"mb-6\"><label class=\"text-slate-400 font-medium mr-4\">분류 단계 (유형):</label><div class=\"inline-flex space-x-4\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		for _, level := range []string{"대분류", "중분류", "소분류"} {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "<label class=\"flex items-center\"><input type=\"radio\" name=\"type_level\" value=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var28 string
+			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(level)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 183, Col: 59}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if typeLevel == level {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, " checked")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, " onchange=\"updateTypeLevel(this.value)\" class=\"mr-2\"> <span class=\"text-slate-200\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var29 string
+			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(level)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 184, Col: 44}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "</span></label>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "</div></div><div class=\"grid grid-cols-1 xl:grid-cols-2 gap-8\"><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800\"><h4 class=\"font-bold mb-4 text-slate-400\">상위 5개 <span id=\"type-level-text\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var30 string
+		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(typeLevel)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 191, Col: 98}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, "</span></h4><div id=\"type-bar-chart\" class=\"chart-box\"></div></div><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800\"><h4 class=\"font-bold mb-4 text-slate-400\"><span id=\"type-level-text2\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var31 string
+		templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(typeLevel)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 195, Col: 87}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "</span>별 추이</h4><div id=\"type-line-chart\" class=\"chart-box\"></div></div></div></div><div class=\"mb-8\"><h2 class=\"text-2xl font-bold text-white mb-6\">위치별 집중 분석</h2><div class=\"mb-6\"><label class=\"text-slate-400 font-medium mr-4\">분류 단계 (위치):</label><div class=\"inline-flex space-x-2\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		for _, level := range []string{"대분류", "중분류"} {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "<label class=\"flex items-center\"><input type=\"radio\" name=\"loc_level\" value=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var32 string
+			templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(level)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 208, Col: 58}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if locLevel == level {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, " checked")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, " onchange=\"updateLocLevel(this.value)\" class=\"mr-2\"> <span class=\"text-slate-200\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var33 string
+			templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(level)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 209, Col: 44}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "</span></label>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 59, "</div></div><div class=\"grid grid-cols-1 xl:grid-cols-2 gap-8\"><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800\"><h4 class=\"font-bold mb-4 text-slate-400\">상위 5개 <span id=\"loc-level-text\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var34 string
+		templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(locLevel)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 216, Col: 96}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, "</span></h4><div id=\"loc-bar-chart\" class=\"chart-box\"></div></div><div class=\"bg-slate-900 p-6 rounded-2xl border border-slate-800\"><h4 class=\"font-bold mb-4 text-slate-400\"><span id=\"loc-level-text2\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var35 string
+		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(locLevel)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 220, Col: 85}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 61, "</span>별 추이</h4><div id=\"loc-line-chart\" class=\"chart-box\"></div></div></div></div></main><script>\r\n\t\t\twindow.addEventListener('load', function() {\r\n\t\t\t\tsetTimeout(function() {\r\n\t\t\t\t\tconst store = document.getElementById('data-store');\r\n\t\t\t\t\tif (!store) return;\r\n\t\t\t\t\tconst monthlyData = JSON.parse(store.getAttribute('data-monthly') || '[]');\r\n\t\t\t\t\tconst hourlyData = JSON.parse(store.getAttribute('data-hourly') || '[]');\r\n\t\t\t\t\tconst heatmapData = JSON.parse(store.getAttribute('data-heatmap'));\r\n\t\t\t\t\tconst typeAnalysis = JSON.parse(store.getAttribute('data-type-analysis') || '{}');\r\n\t\t\t\t\tconst locAnalysis = JSON.parse(store.getAttribute('data-loc-analysis') || '{}');\r\n\r\n\t\t\t\t\tconst commonLayout = {\r\n\t\t\t\t\t\tautosize: true,\r\n\t\t\t\t\t\tpaper_bgcolor: 'rgba(0,0,0,0)',\r\n\t\t\t\t\t\tplot_bgcolor: 'rgba(0,0,0,0)',\r\n\t\t\t\t\t\tfont: { color: '#94a3b8', family: 'Pretendard' },\r\n\t\t\t\t\t\tmargin: { t: 30, r: 30, l: 50, b: 50 },\r\n\t\t\t\t\t\txaxis: { gridcolor: '#1e293b', zeroline: false },\r\n\t\t\t\t\t\tyaxis: { gridcolor: '#1e293b', zeroline: false }\r\n\t\t\t\t\t};\r\n\t\t\t\t\tconst config = { responsive: true, displayModeBar: false };\r\n\r\n\t\t\t\t\tPlotly.newPlot('month-chart', [{\r\n\t\t\t\t\t\tx: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],\r\n\t\t\t\t\t\ty: monthlyData,\r\n\t\t\t\t\t\ttext: monthlyData,\r\n\t\t\t\t\t\ttextposition: 'auto',\r\n\t\t\t\t\t\ttextfont: { color: '#ffffff', size: 12 },\r\n\t\t\t\t\t\ttype: 'bar',\r\n\t\t\t\t\t\tmarker: { color: '#3B82F6' }\r\n\t\t\t\t\t}], commonLayout, config);\r\n\r\n\t\t\t\t\tPlotly.newPlot('hour-chart', [{\r\n\t\t\t\t\t\tx: Array.from({length: 24}, (_, i) => i + '시'),\r\n\t\t\t\t\t\ty: hourlyData,\r\n\t\t\t\t\t\ttype: 'scatter',\r\n\t\t\t\t\t\tmode: 'lines+markers',\r\n\t\t\t\t\t\tfill: 'tozeroy',\r\n\t\t\t\t\t\tline: { shape: 'spline', color: '#10b981', width: 3 }\r\n\t\t\t\t\t}], commonLayout, config);\r\n\r\n\t\t\t\t\tPlotly.newPlot('heatmap-chart', [{\r\n\t\t\t\t\t\tx: Array.from({length: 24}, (_, i) => i + '시'), // 24 columns\r\n\t\t\t\t\t\ty: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'], // 12 rows\r\n\t\t\t\t\t\tz: heatmapData,\r\n\t\t\t\t\t\ttype: 'heatmap',\r\n\t\t\t\t\t\tcolorscale: 'Reds',\r\n\t\t\t\t\t\tshowscale: true,\r\n\t\t\t\t\t\txgap: 1,\r\n\t\t\t\t\t\tygap: 1\r\n\t\t\t\t\t}], {\r\n\t\t\t\t\t\t...commonLayout,\r\n\t\t\t\t\t\tyaxis: { \r\n\t\t\t\t\t\t\t...commonLayout.yaxis, \r\n\t\t\t\t\t\t\ttype: 'category', \r\n\t\t\t\t\t\t\tautorange: 'reversed' \r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}, config);\r\n\r\n\t\t\t\t\t// 색 계산 함수\r\n\t\t\t\t\tfunction getTypeColors(values) {\r\n\t\t\t\t\t\tconst max = Math.max(...values);\r\n\t\t\t\t\t\treturn values.map(v => `hsl(${240 + (v / max) * 60}, 70%, 50%)`); // 보라색에서 파란색으로\r\n\t\t\t\t\t}\r\n\r\n\t\t\t\t\tfunction getLocColors(values) {\r\n\t\t\t\t\t\tconst max = Math.max(...values);\r\n\t\t\t\t\t\treturn values.map(v => `hsl(${30 + (v / max) * 30}, 70%, 50%)`); // 주황색에서 빨간색으로\r\n\t\t\t\t\t}\r\n\r\n\t\t\t\t\t// 유형 바 차트\r\n\t\t\t\t\tif (typeAnalysis.TopTypes) {\r\n\t\t\t\t\t\tconst topTypeNames = typeAnalysis.TopTypes.map(t => t.Name);\r\n\t\t\t\t\t\tconst topTypeCounts = typeAnalysis.TopTypes.map(t => t.Count);\r\n\t\t\t\t\t\tconst typeColors = getTypeColors(topTypeCounts);\r\n\t\t\t\t\t\tPlotly.newPlot('type-bar-chart', [{\r\n\t\t\t\t\t\t\tx: topTypeNames,\r\n\t\t\t\t\t\t\ty: topTypeCounts,\r\n\t\t\t\t\t\t\ttext: topTypeCounts,\r\n\t\t\t\t\t\t\ttextposition: 'auto',\r\n\t\t\t\t\t\t\ttextfont: { color: '#ffffff', size: 12 },\r\n\t\t\t\t\t\t\ttype: 'bar',\r\n\t\t\t\t\t\t\tmarker: { color: typeColors }\r\n\t\t\t\t\t\t}], commonLayout, config);\r\n\t\t\t\t\t}\r\n\r\n\t\t\t\t\t// 유형 라인 차트\r\n\t\t\t\t\tif (typeAnalysis.TrendData) {\r\n\t\t\t\t\t\tconst periods = [...new Set(typeAnalysis.TrendData.map(t => t.Period))].sort();\r\n\t\t\t\t\t\tconst traces = [];\r\n\t\t\t\t\t\tconst names = [...new Set(typeAnalysis.TrendData.map(t => t.Name))];\r\n\t\t\t\t\t\tnames.forEach(name => {\r\n\t\t\t\t\t\t\tconst data = periods.map(p => {\r\n\t\t\t\t\t\t\t\tconst point = typeAnalysis.TrendData.find(t => t.Period === p && t.Name === name);\r\n\t\t\t\t\t\t\t\treturn point ? point.Count : 0;\r\n\t\t\t\t\t\t\t});\r\n\t\t\t\t\t\t\ttraces.push({\r\n\t\t\t\t\t\t\t\tx: periods,\r\n\t\t\t\t\t\t\t\ty: data,\r\n\t\t\t\t\t\t\t\ttype: 'scatter',\r\n\t\t\t\t\t\t\t\tmode: 'lines+markers',\r\n\t\t\t\t\t\t\t\tname: name,\r\n\t\t\t\t\t\t\t\tline: { width: 2 }\r\n\t\t\t\t\t\t\t});\r\n\t\t\t\t\t\t});\r\n\t\t\t\t\t\tPlotly.newPlot('type-line-chart', traces, commonLayout, config);\r\n\t\t\t\t\t}\r\n\r\n\t\t\t\t\t// 위치 바 차트\r\n\t\t\t\t\tif (locAnalysis.TopLocations) {\r\n\t\t\t\t\t\tconst topLocNames = locAnalysis.TopLocations.map(l => l.Name);\r\n\t\t\t\t\t\tconst topLocCounts = locAnalysis.TopLocations.map(l => l.Count);\r\n\t\t\t\t\t\tconst locColors = getLocColors(topLocCounts);\r\n\t\t\t\t\t\tPlotly.newPlot('loc-bar-chart', [{\r\n\t\t\t\t\t\t\tx: topLocNames,\r\n\t\t\t\t\t\t\ty: topLocCounts,\r\n\t\t\t\t\t\t\ttext: topLocCounts,\r\n\t\t\t\t\t\t\ttextposition: 'auto',\r\n\t\t\t\t\t\t\ttextfont: { color: '#ffffff', size: 12 },\r\n\t\t\t\t\t\t\ttype: 'bar',\r\n\t\t\t\t\t\t\tmarker: { color: locColors }\r\n\t\t\t\t\t\t}], commonLayout, config);\r\n\t\t\t\t\t}\r\n\r\n\t\t\t\t\t// 위치 라인 차트\r\n\t\t\t\t\tif (locAnalysis.TrendData) {\r\n\t\t\t\t\t\tconst periods = [...new Set(locAnalysis.TrendData.map(t => t.Period))].sort();\r\n\t\t\t\t\t\tconst traces = [];\r\n\t\t\t\t\t\tconst names = [...new Set(locAnalysis.TrendData.map(t => t.Name))];\r\n\t\t\t\t\t\tnames.forEach(name => {\r\n\t\t\t\t\t\t\tconst data = periods.map(p => {\r\n\t\t\t\t\t\t\t\tconst point = locAnalysis.TrendData.find(t => t.Period === p && t.Name === name);\r\n\t\t\t\t\t\t\t\treturn point ? point.Count : 0;\r\n\t\t\t\t\t\t\t});\r\n\t\t\t\t\t\t\ttraces.push({\r\n\t\t\t\t\t\t\t\tx: periods,\r\n\t\t\t\t\t\t\t\ty: data,\r\n\t\t\t\t\t\t\t\ttype: 'scatter',\r\n\t\t\t\t\t\t\t\tmode: 'lines+markers',\r\n\t\t\t\t\t\t\t\tname: name,\r\n\t\t\t\t\t\t\t\tline: { width: 2 }\r\n\t\t\t\t\t\t\t});\r\n\t\t\t\t\t\t});\r\n\t\t\t\t\t\tPlotly.newPlot('loc-line-chart', traces, commonLayout, config);\r\n\t\t\t\t\t}\r\n\r\n\t\t\t\t\twindow.onresize = function() {\r\n\t\t\t\t\t\tPlotly.Plots.resize('month-chart');\r\n\t\t\t\t\t\tPlotly.Plots.resize('hour-chart');\r\n\t\t\t\t\t\tPlotly.Plots.resize('heatmap-chart');\r\n\t\t\t\t\t\tPlotly.Plots.resize('type-bar-chart');\r\n\t\t\t\t\t\tPlotly.Plots.resize('type-line-chart');\r\n\t\t\t\t\t\tPlotly.Plots.resize('loc-bar-chart');\r\n\t\t\t\t\t\tPlotly.Plots.resize('loc-line-chart');\r\n\t\t\t\t\t};\r\n\r\n\t\t\t\t\t// 전역 변수로 현재 레벨 저장\r\n\t\t\t\t\tlet currentTypeLevel = '{ typeLevel }';\r\n\t\t\t\t\tlet currentLocLevel = '{ locLevel }';\r\n\r\n\t\t\t\t\t// 차트 업데이트 함수\r\n\t\t\t\t\tfunction updateTypeCharts(analysis) {\r\n\t\t\t\t\t\tif (analysis.TopTypes) {\r\n\t\t\t\t\t\t\tconst topTypeNames = analysis.TopTypes.map(t => t.Name);\r\n\t\t\t\t\t\t\tconst topTypeCounts = analysis.TopTypes.map(t => t.Count);\r\n\t\t\t\t\t\t\tconst typeColors = getTypeColors(topTypeCounts);\r\n\t\t\t\t\t\t\tPlotly.react('type-bar-chart', [{\r\n\t\t\t\t\t\t\t\tx: topTypeNames,\r\n\t\t\t\t\t\t\t\ty: topTypeCounts,\r\n\t\t\t\t\t\t\t\ttext: topTypeCounts,\r\n\t\t\t\t\t\t\t\ttextposition: 'auto',\r\n\t\t\t\t\t\t\t\ttextfont: { color: '#ffffff', size: 12 },\r\n\t\t\t\t\t\t\t\ttype: 'bar',\r\n\t\t\t\t\t\t\t\tmarker: { color: typeColors }\r\n\t\t\t\t\t\t\t}], commonLayout, config);\r\n\t\t\t\t\t\t}\r\n\r\n\t\t\t\t\t\tif (analysis.TrendData) {\r\n\t\t\t\t\t\t\tconst periods = [...new Set(analysis.TrendData.map(t => t.Period))].sort();\r\n\t\t\t\t\t\t\tconst traces = [];\r\n\t\t\t\t\t\t\tconst names = [...new Set(analysis.TrendData.map(t => t.Name))];\r\n\t\t\t\t\t\t\tnames.forEach(name => {\r\n\t\t\t\t\t\t\t\tconst data = periods.map(p => {\r\n\t\t\t\t\t\t\t\t\tconst point = analysis.TrendData.find(t => t.Period === p && t.Name === name);\r\n\t\t\t\t\t\t\t\t\treturn point ? point.Count : 0;\r\n\t\t\t\t\t\t\t\t});\r\n\t\t\t\t\t\t\t\ttraces.push({\r\n\t\t\t\t\t\t\t\t\tx: periods,\r\n\t\t\t\t\t\t\t\t\ty: data,\r\n\t\t\t\t\t\t\t\t\ttype: 'scatter',\r\n\t\t\t\t\t\t\t\t\tmode: 'lines+markers',\r\n\t\t\t\t\t\t\t\t\tname: name,\r\n\t\t\t\t\t\t\t\t\tline: { width: 2 }\r\n\t\t\t\t\t\t\t\t});\r\n\t\t\t\t\t\t\t});\r\n\t\t\t\t\t\t\tPlotly.react('type-line-chart', traces, commonLayout, config);\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\r\n\t\t\t\t\tfunction updateLocCharts(analysis) {\r\n\t\t\t\t\t\tif (analysis.TopLocations) {\r\n\t\t\t\t\t\t\tconst topLocNames = analysis.TopLocations.map(l => l.Name);\r\n\t\t\t\t\t\t\tconst topLocCounts = analysis.TopLocations.map(l => l.Count);\r\n\t\t\t\t\t\t\tconst locColors = getLocColors(topLocCounts);\r\n\t\t\t\t\t\t\tPlotly.react('loc-bar-chart', [{\r\n\t\t\t\t\t\t\t\tx: topLocNames,\r\n\t\t\t\t\t\t\t\ty: topLocCounts,\r\n\t\t\t\t\t\t\t\ttext: topLocCounts,\r\n\t\t\t\t\t\t\t\ttextposition: 'auto',\r\n\t\t\t\t\t\t\t\ttextfont: { color: '#ffffff', size: 12 },\r\n\t\t\t\t\t\t\t\ttype: 'bar',\r\n\t\t\t\t\t\t\t\tmarker: { color: locColors }\r\n\t\t\t\t\t\t\t}], commonLayout, config);\r\n\t\t\t\t\t\t}\r\n\r\n\t\t\t\t\t\tif (analysis.TrendData) {\r\n\t\t\t\t\t\t\tconst periods = [...new Set(analysis.TrendData.map(t => t.Period))].sort();\r\n\t\t\t\t\t\t\tconst traces = [];\r\n\t\t\t\t\t\t\tconst names = [...new Set(analysis.TrendData.map(t => t.Name))];\r\n\t\t\t\t\t\t\tnames.forEach(name => {\r\n\t\t\t\t\t\t\t\tconst data = periods.map(p => {\r\n\t\t\t\t\t\t\t\t\tconst point = analysis.TrendData.find(t => t.Period === p && t.Name === name);\r\n\t\t\t\t\t\t\t\t\treturn point ? point.Count : 0;\r\n\t\t\t\t\t\t\t\t});\r\n\t\t\t\t\t\t\t\ttraces.push({\r\n\t\t\t\t\t\t\t\t\tx: periods,\r\n\t\t\t\t\t\t\t\t\ty: data,\r\n\t\t\t\t\t\t\t\t\ttype: 'scatter',\r\n\t\t\t\t\t\t\t\t\tmode: 'lines+markers',\r\n\t\t\t\t\t\t\t\t\tname: name,\r\n\t\t\t\t\t\t\t\t\tline: { width: 2 }\r\n\t\t\t\t\t\t\t\t});\r\n\t\t\t\t\t\t\t});\r\n\t\t\t\t\t\t\tPlotly.react('loc-line-chart', traces, commonLayout, config);\r\n\t\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\r\n\t\t\t\t\t// 라디오 버튼 변경 함수\r\n\t\t\t\t\twindow.updateTypeLevel = function(level) {\r\n\t\t\t\t\t\tcurrentTypeLevel = level;\r\n\t\t\t\t\t\tdocument.getElementById('type-level-text').textContent = level;\r\n\t\t\t\t\t\tdocument.getElementById('type-level-text2').textContent = level;\r\n\t\t\t\t\t\tfetchAnalysis();\r\n\t\t\t\t\t};\r\n\r\n\t\t\t\t\twindow.updateLocLevel = function(level) {\r\n\t\t\t\t\t\tcurrentLocLevel = level;\r\n\t\t\t\t\t\tdocument.getElementById('loc-level-text').textContent = level;\r\n\t\t\t\t\t\tdocument.getElementById('loc-level-text2').textContent = level;\r\n\t\t\t\t\t\tfetchAnalysis();\r\n\t\t\t\t\t};\r\n\r\n\t\t\t\t\t// API 호출 함수\r\n\t\t\t\t\tfunction fetchAnalysis() {\r\n\t\t\t\t\t\tconst params = new URLSearchParams(window.location.search);\r\n\t\t\t\t\t\tparams.set('type_level', currentTypeLevel);\r\n\t\t\t\t\t\tparams.set('loc_level', currentLocLevel);\r\n\t\t\t\t\t\tfetch('/api/analysis?' + params.toString())\r\n\t\t\t\t\t\t\t.then(response => response.json())\r\n\t\t\t\t\t\t\t.then(data => {\r\n\t\t\t\t\t\t\t\tupdateTypeCharts(data.typeAnalysis);\r\n\t\t\t\t\t\t\t\tupdateLocCharts(data.locAnalysis);\r\n\t\t\t\t\t\t\t})\r\n\t\t\t\t\t\t\t.catch(error => console.error('Error fetching analysis:', error));\r\n\t\t\t\t\t}\r\n\t\t\t\t}, 200);\r\n\t\t\t});\r\n\t\t</script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
