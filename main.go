@@ -103,7 +103,7 @@ func main() {
 		filtered := applyFilters(allData, year, month, day, hour)
 
 		// 2. 통계 계산 (기존 차트용)
-		monthly, hourly, heatmap, weekdayHeatmap := handlers.GetAggregateStats(filtered)
+		monthly, hourly, heatmap, weekdayHeatmap, severityCounts := handlers.GetAggregateStats(filtered)
 
 		// 3. 신규 데이터 추출 (연도 목록, KPI)
 		availableYears := handlers.GetUniqueYears(allData)
@@ -132,6 +132,7 @@ func main() {
 			kpis,
 			heatmap,
 			weekdayHeatmap,
+			severityCounts,
 			typeLevel,
 			locLevel,
 			typeAnalysis,

@@ -26,6 +26,7 @@ templ Dashboard(
 	kpi handlers.DashboardKPIs,
 	heatmap [12][24]int,
 	weekdayHeatmap [7][24]int,
+	severityCounts map[string]int,
 	typeLevel, locLevel string,
 	typeAnalysis handlers.TypeAnalysis,
 	locAnalysis handlers.LocationAnalysis) {
@@ -50,6 +51,7 @@ templ Dashboard(
 			 data-hourly={ templ.JSONString(hourly) }
 			 data-heatmap={ templ.JSONString(heatmap) }
 			 data-weekday-heatmap={ templ.JSONString(weekdayHeatmap) }
+			 data-severity-counts={ templ.JSONString(severityCounts) }
 			 data-type-analysis={ templ.JSONString(typeAnalysis) }
 			 data-loc-analysis={ templ.JSONString(locAnalysis) }
 			 style="display: none;"></div>
@@ -194,7 +196,13 @@ templ Dashboard(
 				</div>
 			</div>
 
-			<div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+			<div class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
+				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
+					<h3 class="font-bold mb-4 text-slate-400 flex items-center">
+						<span class="w-1.5 h-1.5 bg-red-500 rounded-full mr-2"></span>이벤트 등급 분포
+					</h3>
+					<div id="severity-donut-chart" class="chart-box" style="height: 450px !important;"></div>
+				</div>
 				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
 					<h3 class="font-bold mb-4 text-slate-400 flex items-center">
 						<span class="w-1.5 h-1.5 bg-orange-500 rounded-full mr-2"></span>월별-시간대별 분석 히트맵
@@ -270,7 +278,8 @@ templ Dashboard(
 					const monthlyData = JSON.parse(store.getAttribute('data-monthly') || '[]');
 					const hourlyData = JSON.parse(store.getAttribute('data-hourly') || '[]');
 					const heatmapData = JSON.parse(store.getAttribute('data-heatmap'));
-				const weekdayHeatmapData = JSON.parse(store.getAttribute('data-weekday-heatmap') || '[]');
+					const weekdayHeatmapData = JSON.parse(store.getAttribute('data-weekday-heatmap') || '[]');
+					const severityCounts = JSON.parse(store.getAttribute('data-severity-counts') || '{}');
 					const typeAnalysis = JSON.parse(store.getAttribute('data-type-analysis') || '{}');
 					const locAnalysis = JSON.parse(store.getAttribute('data-loc-analysis') || '{}');
 
@@ -304,39 +313,77 @@ templ Dashboard(
 						line: { shape: 'spline', color: '#10b981', width: 3 }
 					}], commonLayout, config);
 
-					Plotly.newPlot('heatmap-chart', [{
-					x: Array.from({length: 24}, (_, i) => i + '시'),
-					y: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
-					z: heatmapData,
-					type: 'heatmap',
-					colorscale: 'Reds',
-					showscale: true,
-					xgap: 1,
-					ygap: 1
-				}], {
-					...commonLayout,
-					yaxis: { 
-						...commonLayout.yaxis, 
-						type: 'category', 
-						autorange: 'reversed' 
-					}
-				}, config);
+					const severityEntries = Object.entries(severityCounts)
+						.filter(([, count]) => count > 0)
+						.sort((left, right) => right[1] - left[1]);
+					const severityPalette = {
+						'심각': '#dc2626',
+						'경고': '#f97316',
+						'주의': '#f59e0b',
+						'보통': '#3b82f6',
+						'정상': '#10b981'
+					};
+					const fallbackSeverityColors = ['#ef4444', '#f97316', '#f59e0b', '#3b82f6', '#14b8a6', '#8b5cf6'];
+					Plotly.newPlot('severity-donut-chart', [{
+						labels: severityEntries.map(([label]) => label),
+						values: severityEntries.map(([, count]) => count),
+						type: 'pie',
+						hole: 0.55,
+						sort: false,
+						textinfo: 'label+percent',
+						hovertemplate: '%{label}: %{value}건<extra></extra>',
+						marker: {
+							colors: severityEntries.map(([label], index) => severityPalette[label] || fallbackSeverityColors[index % fallbackSeverityColors.length])
+						}
+					}], {
+						paper_bgcolor: 'rgba(0,0,0,0)',
+						plot_bgcolor: 'rgba(0,0,0,0)',
+						font: { color: '#94a3b8', family: 'Pretendard' },
+						margin: { t: 30, r: 20, l: 20, b: 70 },
+						showlegend: true,
+						legend: { orientation: 'h', y: -0.2, x: 0.5, xanchor: 'center' },
+						annotations: severityEntries.length > 0 ? [] : [{
+							text: '데이터 없음',
+							x: 0.5,
+							y: 0.5,
+							showarrow: false,
+							font: { color: '#64748b', size: 16 }
+						}]
+					}, config);
 
-				Plotly.newPlot('weekday-heatmap-chart', [{
-					x: Array.from({length: 24}, (_, i) => i + '시'),
-					y: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
-					z: weekdayHeatmapData,
-					type: 'heatmap',
-					colorscale: 'Reds',
-					showscale: true,
-					xgap: 1,
-					ygap: 1
-				}], {
+					Plotly.newPlot('heatmap-chart', [{
+						x: Array.from({length: 24}, (_, i) => i + '시'),
+						y: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+						z: heatmapData,
+						type: 'heatmap',
+						colorscale: 'Reds',
+						showscale: true,
+						xgap: 1,
+						ygap: 1
+					}], {
 						...commonLayout,
-						yaxis: { 
-							...commonLayout.yaxis, 
-							type: 'category', 
-							autorange: 'reversed' 
+						yaxis: {
+							...commonLayout.yaxis,
+							type: 'category',
+							autorange: 'reversed'
+						}
+					}, config);
+
+					Plotly.newPlot('weekday-heatmap-chart', [{
+						x: Array.from({length: 24}, (_, i) => i + '시'),
+						y: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
+						z: weekdayHeatmapData,
+						type: 'heatmap',
+						colorscale: 'Reds',
+						showscale: true,
+						xgap: 1,
+						ygap: 1
+					}], {
+						...commonLayout,
+						yaxis: {
+							...commonLayout.yaxis,
+							type: 'category',
+							autorange: 'reversed'
 						}
 					}, config);
 
@@ -440,8 +487,9 @@ templ Dashboard(
 					window.onresize = function() {
 						Plotly.Plots.resize('month-chart');
 						Plotly.Plots.resize('hour-chart');
+						Plotly.Plots.resize('severity-donut-chart');
 						Plotly.Plots.resize('heatmap-chart');
-					Plotly.Plots.resize('weekday-heatmap-chart');
+						Plotly.Plots.resize('weekday-heatmap-chart');
 						Plotly.Plots.resize('type-bar-chart');
 						Plotly.Plots.resize('type-line-chart');
 						Plotly.Plots.resize('loc-bar-chart');

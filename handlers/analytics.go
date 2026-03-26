@@ -28,12 +28,13 @@ func GetUniqueYears(data []CrisisData) []string {
 	return result
 }
 
-// 통합 통계: 월별, 시간별, 히트맵을 한 번에 수집해 루프를 줄입니다.
-func GetAggregateStats(data []CrisisData) ([12]int, [24]int, [12][24]int, [7][24]int) {
+// 통합 통계: 월별, 시간별, 히트맵, 등급 분포를 한 번에 수집합니다.
+func GetAggregateStats(data []CrisisData) ([12]int, [24]int, [12][24]int, [7][24]int, map[string]int) {
 	var monthly [12]int
 	var hourly [24]int
 	var heatmap [12][24]int
 	var weekdayHeatmap [7][24]int
+	severityCounts := make(map[string]int)
 	for _, item := range data {
 		if item.Month >= 1 && item.Month <= 12 {
 			monthly[item.Month-1]++
@@ -48,8 +49,11 @@ func GetAggregateStats(data []CrisisData) ([12]int, [24]int, [12][24]int, [7][24
 			wd := int(time.Date(item.Year, time.Month(item.Month), item.Day, 0, 0, 0, 0, time.UTC).Weekday())
 			weekdayHeatmap[wd][item.Hour]++
 		}
+		if item.Severity != "" {
+			severityCounts[item.Severity]++
+		}
 	}
-	return monthly, hourly, heatmap, weekdayHeatmap
+	return monthly, hourly, heatmap, weekdayHeatmap, severityCounts
 }
 
 // KPI 계산 (구조체 및 함수)
