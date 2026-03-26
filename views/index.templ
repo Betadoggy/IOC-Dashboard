@@ -314,7 +314,12 @@ templ Dashboard(
 					if (typeAnalysis.TrendData) {
 						const periods = [...new Set(typeAnalysis.TrendData.map(t => t.Period))].sort();
 						const traces = [];
-						const names = [...new Set(typeAnalysis.TrendData.map(t => t.Name))];
+						const nameTotals = {};
+						typeAnalysis.TrendData.forEach(t => {
+							if (!nameTotals[t.Name]) nameTotals[t.Name] = 0;
+							nameTotals[t.Name] += t.Count;
+						});
+						const names = Object.keys(nameTotals).sort((a, b) => nameTotals[b] - nameTotals[a]);
 						names.forEach(name => {
 							const data = periods.map(p => {
 								const point = typeAnalysis.TrendData.find(t => t.Period === p && t.Name === name);
@@ -352,7 +357,12 @@ templ Dashboard(
 					if (locAnalysis.TrendData) {
 						const periods = [...new Set(locAnalysis.TrendData.map(t => t.Period))].sort();
 						const traces = [];
-						const names = [...new Set(locAnalysis.TrendData.map(t => t.Name))];
+						const nameTotals = {};
+						locAnalysis.TrendData.forEach(t => {
+							if (!nameTotals[t.Name]) nameTotals[t.Name] = 0;
+							nameTotals[t.Name] += t.Count;
+						});
+						const names = Object.keys(nameTotals).sort((a, b) => nameTotals[b] - nameTotals[a]);
 						names.forEach(name => {
 							const data = periods.map(p => {
 								const point = locAnalysis.TrendData.find(t => t.Period === p && t.Name === name);
@@ -404,7 +414,12 @@ templ Dashboard(
 						if (analysis.TrendData) {
 							const periods = [...new Set(analysis.TrendData.map(t => t.Period))].sort();
 							const traces = [];
-							const names = [...new Set(analysis.TrendData.map(t => t.Name))];
+							const nameTotals = {};
+							analysis.TrendData.forEach(t => {
+								if (!nameTotals[t.Name]) nameTotals[t.Name] = 0;
+								nameTotals[t.Name] += t.Count;
+							});
+							const names = Object.keys(nameTotals).sort((a, b) => nameTotals[b] - nameTotals[a]);
 							names.forEach(name => {
 								const data = periods.map(p => {
 									const point = analysis.TrendData.find(t => t.Period === p && t.Name === name);
@@ -442,7 +457,12 @@ templ Dashboard(
 						if (analysis.TrendData) {
 							const periods = [...new Set(analysis.TrendData.map(t => t.Period))].sort();
 							const traces = [];
-							const names = [...new Set(analysis.TrendData.map(t => t.Name))];
+							const nameTotals = {};
+							analysis.TrendData.forEach(t => {
+								if (!nameTotals[t.Name]) nameTotals[t.Name] = 0;
+								nameTotals[t.Name] += t.Count;
+							});
+							const names = Object.keys(nameTotals).sort((a, b) => nameTotals[b] - nameTotals[a]);
 							names.forEach(name => {
 								const data = periods.map(p => {
 									const point = analysis.TrendData.find(t => t.Period === p && t.Name === name);
