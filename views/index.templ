@@ -398,6 +398,20 @@ templ Dashboard(
 						return values.map(v => `hsl(${30 + (v / max) * 30}, 70%, 50%)`); // 주황색에서 빨간색으로
 					}
 
+					function getTrendXAxis(periods) {
+						if (!periods || periods.length <= 12) {
+							return { ...commonLayout.xaxis };
+						}
+						const step = periods.length > 24 ? 3 : 2;
+						const tickvals = periods.filter((_, idx) => idx % step === 0);
+						return {
+							...commonLayout.xaxis,
+							tickmode: 'array',
+							tickvals: tickvals,
+							ticktext: tickvals
+						};
+					}
+
 					// 유형 바 차트
 					if (typeAnalysis.TopTypes) {
 						const topTypeNames = typeAnalysis.TopTypes.map(t => t.Name);
@@ -438,7 +452,10 @@ templ Dashboard(
 								line: { width: 2 }
 							});
 						});
-						Plotly.newPlot('type-line-chart', traces, commonLayout, config);
+						Plotly.newPlot('type-line-chart', traces, {
+							...commonLayout,
+							xaxis: getTrendXAxis(periods)
+						}, config);
 					}
 
 					// 위치 바 차트
@@ -481,7 +498,10 @@ templ Dashboard(
 								line: { width: 2 }
 							});
 						});
-						Plotly.newPlot('loc-line-chart', traces, commonLayout, config);
+						Plotly.newPlot('loc-line-chart', traces, {
+							...commonLayout,
+							xaxis: getTrendXAxis(periods)
+						}, config);
 					}
 
 					window.onresize = function() {
@@ -540,7 +560,10 @@ templ Dashboard(
 									line: { width: 2 }
 								});
 							});
-							Plotly.react('type-line-chart', traces, commonLayout, config);
+							Plotly.react('type-line-chart', traces, {
+								...commonLayout,
+								xaxis: getTrendXAxis(periods)
+							}, config);
 						}
 					}
 
@@ -583,7 +606,10 @@ templ Dashboard(
 									line: { width: 2 }
 								});
 							});
-							Plotly.react('loc-line-chart', traces, commonLayout, config);
+							Plotly.react('loc-line-chart', traces, {
+								...commonLayout,
+								xaxis: getTrendXAxis(periods)
+							}, config);
 						}
 					}
 

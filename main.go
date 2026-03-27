@@ -171,7 +171,7 @@ func main() {
 		filtered := applyFilters(allData, year, month, day, hour)
 
 		groupCol := "월"
-		if month != 0 {
+		if month != -1 {
 			groupCol = "일"
 		}
 		typeAnalysis := handlers.GetTypeAnalysis(filtered, typeLevel, groupCol)
