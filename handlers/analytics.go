@@ -66,7 +66,7 @@ type DashboardKPIs struct {
 	LTIDays      float64
 }
 
-func GetDashboardKPIs(filtered []CrisisData, allData []CrisisData) DashboardKPIs {
+func GetDashboardKPIs(filtered []CrisisData, allData []CrisisData, filterYear, filterMonth, filterDay int) DashboardKPIs {
 	kpi := DashboardKPIs{
 		TotalCount:   len(filtered),
 		DailyAverage: 0.0,
@@ -83,7 +83,6 @@ func GetDashboardKPIs(filtered []CrisisData, allData []CrisisData) DashboardKPIs
 	maxH, maxHC := 0, 0
 	tCounts := make(map[string]int)
 	maxT, maxTC := "", 0
-	uniqueDays := make(map[string]bool)
 	mttrSumByType := make(map[string]float64)
 	mttrCountByType := make(map[string]int)
 
@@ -100,8 +99,6 @@ func GetDashboardKPIs(filtered []CrisisData, allData []CrisisData) DashboardKPIs
 				maxT = d.TypeMain
 			}
 		}
-		dateKey := fmt.Sprintf("%d-%02d-%02d", d.Year, d.Month, d.Day)
-		uniqueDays[dateKey] = true
 
 		occurredAt, errOccurred := parseFlexTime(d.Timestamp)
 		resolvedRaw := d.ResolvedAt
@@ -120,8 +117,10 @@ func GetDashboardKPIs(filtered []CrisisData, allData []CrisisData) DashboardKPIs
 	}
 	kpi.PeakHour = maxH
 	kpi.TopType = maxT
-	if len(uniqueDays) > 0 {
-		kpi.DailyAverage = float64(len(filtered)) / float64(len(uniqueDays))
+
+	totalDays := calcTotalDays(filtered, filterYear, filterMonth, filterDay)
+	if totalDays > 0 {
+		kpi.DailyAverage = float64(len(filtered)) / float64(totalDays)
 	}
 
 	for typeKey, sum := range mttrSumByType {
@@ -151,6 +150,52 @@ func GetDashboardKPIs(filtered []CrisisData, allData []CrisisData) DashboardKPIs
 	}
 
 	return kpi
+}
+
+// 필터 조건에 따른 전체 일수 계산
+func calcTotalDays(filtered []CrisisData, filterYear, filterMonth, filterDay int) int {
+	if filterYear != -1 && filterMonth != -1 && filterDay != -1 {
+		// 특정 날짜 지정 → 1일
+		return 1
+	}
+	if filterYear != -1 && filterMonth != -1 {
+		// 특정 연/월 → 해당 월의 총 일수
+		return time.Date(filterYear, time.Month(filterMonth)+1, 0, 0, 0, 0, 0, time.UTC).Day()
+	}
+	if filterYear != -1 {
+		// 특정 연도 → 365 or 366
+		start := time.Date(filterYear, 1, 1, 0, 0, 0, 0, time.UTC)
+		end := time.Date(filterYear+1, 1, 1, 0, 0, 0, 0, time.UTC)
+		return int(end.Sub(start).Hours() / 24)
+	}
+	// 필터 없음 → 데이터의 최소~최대 날짜 범위
+	if len(filtered) == 0 {
+		return 0
+	}
+	var minDate, maxDate time.Time
+	first := true
+	for _, d := range filtered {
+		if d.Year <= 0 || d.Month < 1 || d.Day < 1 {
+			continue
+		}
+		dt := time.Date(d.Year, time.Month(d.Month), d.Day, 0, 0, 0, 0, time.UTC)
+		if first {
+			minDate = dt
+			maxDate = dt
+			first = false
+		} else {
+			if dt.Before(minDate) {
+				minDate = dt
+			}
+			if dt.After(maxDate) {
+				maxDate = dt
+			}
+		}
+	}
+	if first {
+		return 0
+	}
+	return int(maxDate.Sub(minDate).Hours()/24) + 1
 }
 
 // 유형 분석 구조체

@@ -107,7 +107,7 @@ func main() {
 
 		// 3. 신규 데이터 추출 (연도 목록, KPI)
 		availableYears := handlers.GetUniqueYears(allData)
-		kpis := handlers.GetDashboardKPIs(filtered, allData)
+		kpis := handlers.GetDashboardKPIs(filtered, allData, year, month, day)
 
 		// 4. 유형 및 위치 분석
 		groupCol := "월"
