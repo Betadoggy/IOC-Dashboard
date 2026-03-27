@@ -1,5 +1,9 @@
 # IOC
 
+
+## Getting Started
+Open http://localhost:8080 with your browser to see the result.
+
 (참고용) 다운로드 링크 
 
 VS Code
@@ -17,10 +21,10 @@ https://github.com/git-for-windows/git/releases/download/v2.53.0.windows.2/Git-2
 ### 명령어
 
 templ설치
-go install github.com/a-h/templ/cmd/templ@latest
+`go install github.com/a-h/templ/cmd/templ@latest`
 
 air 설치
-go install github.com/air-verse/air@latest
+`go install github.com/air-verse/air@latest`
 
 Golang PATH 지정
-$env:Path += ";C:\Users\90915\go\bin"
+`$env:Path += ";C:\Users\90915\go\bin"`
