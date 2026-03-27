@@ -30,28 +30,28 @@ func (t *TemplRenderer) Render(w io.Writer, name string, data interface{}, c ech
 
 func parseQueryInt(q string) int {
 	if q == "" {
-		return 0
+		return -1
 	}
 	v, _ := strconv.Atoi(q)
 	return v
 }
 
 func applyFilters(data []handlers.CrisisData, year, month, day, hour int) []handlers.CrisisData {
-	if year == 0 && month == 0 && day == 0 && hour == 0 {
+	if year == -1 && month == -1 && day == -1 && hour == -1 {
 		return data
 	}
 	filtered := make([]handlers.CrisisData, 0, len(data))
 	for _, d := range data {
-		if year != 0 && d.Year != year {
+		if year != -1 && d.Year != year {
 			continue
 		}
-		if month != 0 && d.Month != month {
+		if month != -1 && d.Month != month {
 			continue
 		}
-		if day != 0 && d.Day != day {
+		if day != -1 && d.Day != day {
 			continue
 		}
-		if hour != 0 && d.Hour != hour {
+		if hour != -1 && d.Hour != hour {
 			continue
 		}
 		filtered = append(filtered, d)

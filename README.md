@@ -21,3 +21,6 @@ go install github.com/a-h/templ/cmd/templ@latest
 
 air 설치
 go install github.com/air-verse/air@latest
+
+Golang PATH 지정
+$env:Path += ";C:\Users\90915\go\bin"
