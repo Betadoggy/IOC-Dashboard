@@ -1,4 +1,4 @@
-# IOC
+# 인천공항 안전 관리 모니터링 체계 대시보드
 
 
 ## Getting Started
@@ -17,10 +17,21 @@ Open http://localhost:8080 with your browser to see the result.
 ### 명령어
 
 templ설치
-`go install github.com/a-h/templ/cmd/templ@latest`
+```
+go install github.com/a-h/templ/cmd/templ@latest
+```
 
 air 설치
-`go install github.com/air-verse/air@latest`
+```
+go install github.com/air-verse/air@latest
+```
 
 Golang PATH 지정
-`$env:Path += ";C:\Users\90915\go\bin"`
+```
+$env:Path += ";C:\Users\90915\go\bin"
+```
+
+Golang 빌드(현재 폴더 이름으로 실행 파일 생성)
+```
+go build .
+```
