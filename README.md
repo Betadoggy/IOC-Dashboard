@@ -31,7 +31,7 @@ air 설치
 go install github.com/air-verse/air@latest
 ```
 
-Golang 빌드(현재 폴더 이름으로 실행 파일 생성)
+Golang 빌드(현재 폴더에 build 실행 파일 생성)
 ```
-go build .
+go build -o build .
 ```
