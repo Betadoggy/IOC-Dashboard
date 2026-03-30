@@ -16,11 +16,6 @@ Open http://localhost:8080 with your browser to see the result.
 
 ### 명령어
 
-Golang PATH 지정
-```
-$env:Path += ";C:\Users\90915\go\bin"
-```
-
 templ설치
 ```
 go install github.com/a-h/templ/cmd/templ@latest
@@ -31,7 +26,12 @@ air 설치
 go install github.com/air-verse/air@latest
 ```
 
-Golang 빌드(현재 폴더에 build 실행 파일 생성)
+Golang PATH 지정
 ```
-go build -o build .
+$env:Path += ";C:\Users\90915\go\bin"
+```
+
+Golang 빌드(현재 폴더 이름으로 실행 파일 생성)
+```
+go build .
 ```

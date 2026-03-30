@@ -56,6 +56,35 @@ func GetAggregateStats(data []CrisisData) ([12]int, [24]int, [12][24]int, [7][24
 	return monthly, hourly, heatmap, weekdayHeatmap, severityCounts
 }
 
+// 시계열 연도별 집계를 정렬된 라벨/값 형태로 반환합니다.
+func GetYearlySeries(data []CrisisData) ([]string, []int) {
+	yearMap := make(map[int]int)
+	for _, item := range data {
+		if item.Year > 0 {
+			yearMap[item.Year]++
+		}
+	}
+
+	if len(yearMap) == 0 {
+		return []string{}, []int{}
+	}
+
+	years := make([]int, 0, len(yearMap))
+	for year := range yearMap {
+		years = append(years, year)
+	}
+	sort.Ints(years)
+
+	labels := make([]string, 0, len(years))
+	counts := make([]int, 0, len(years))
+	for _, year := range years {
+		labels = append(labels, strconv.Itoa(year))
+		counts = append(counts, yearMap[year])
+	}
+
+	return labels, counts
+}
+
 // KPI 계산 (구조체 및 함수)
 type DashboardKPIs struct {
 	TotalCount   int
@@ -66,7 +95,7 @@ type DashboardKPIs struct {
 	LTIDays      float64
 }
 
-func GetDashboardKPIs(filtered []CrisisData, allData []CrisisData, filterYear, filterMonth, filterDay int) DashboardKPIs {
+func GetDashboardKPIs(filtered []CrisisData, allData []CrisisData) DashboardKPIs {
 	kpi := DashboardKPIs{
 		TotalCount:   len(filtered),
 		DailyAverage: 0.0,
@@ -118,7 +147,7 @@ func GetDashboardKPIs(filtered []CrisisData, allData []CrisisData, filterYear, f
 	kpi.PeakHour = maxH
 	kpi.TopType = maxT
 
-	totalDays := calcTotalDays(filtered, filterYear, filterMonth, filterDay)
+	totalDays := calcTotalDays(filtered)
 	if totalDays > 0 {
 		kpi.DailyAverage = float64(len(filtered)) / float64(totalDays)
 	}
@@ -152,23 +181,8 @@ func GetDashboardKPIs(filtered []CrisisData, allData []CrisisData, filterYear, f
 	return kpi
 }
 
-// 필터 조건에 따른 전체 일수 계산
-func calcTotalDays(filtered []CrisisData, filterYear, filterMonth, filterDay int) int {
-	if filterYear != -1 && filterMonth != -1 && filterDay != -1 {
-		// 특정 날짜 지정 → 1일
-		return 1
-	}
-	if filterYear != -1 && filterMonth != -1 {
-		// 특정 연/월 → 해당 월의 총 일수
-		return time.Date(filterYear, time.Month(filterMonth)+1, 0, 0, 0, 0, 0, time.UTC).Day()
-	}
-	if filterYear != -1 {
-		// 특정 연도 → 365 or 366
-		start := time.Date(filterYear, 1, 1, 0, 0, 0, 0, time.UTC)
-		end := time.Date(filterYear+1, 1, 1, 0, 0, 0, 0, time.UTC)
-		return int(end.Sub(start).Hours() / 24)
-	}
-	// 필터 없음 → 데이터의 최소~최대 날짜 범위
+// 데이터의 최소~최대 날짜 범위를 일수로 반환
+func calcTotalDays(filtered []CrisisData) int {
 	if len(filtered) == 0 {
 		return 0
 	}
@@ -255,9 +269,10 @@ func GetTypeAnalysis(filtered []CrisisData, typeLevel string, groupCol string) T
 		typeMap[t]++
 
 		var period string
-		if groupCol == "일" {
-			period = fmt.Sprintf("%d-%02d-%02d", d.Year, d.Month, d.Day)
-		} else {
+		switch groupCol {
+		case "연도":
+			period = fmt.Sprintf("%d", d.Year)
+		default:
 			period = fmt.Sprintf("%d-%02d", d.Year, d.Month)
 		}
 		if trendMap[period] == nil {
@@ -335,9 +350,10 @@ func GetLocationAnalysis(filtered []CrisisData, locLevel string, groupCol string
 		locMap[l]++
 
 		var period string
-		if groupCol == "일" {
-			period = fmt.Sprintf("%d-%02d-%02d", d.Year, d.Month, d.Day)
-		} else {
+		switch groupCol {
+		case "연도":
+			period = fmt.Sprintf("%d", d.Year)
+		default:
 			period = fmt.Sprintf("%d-%02d", d.Year, d.Month)
 		}
 		if trendMap[period] == nil {

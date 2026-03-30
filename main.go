@@ -36,23 +36,30 @@ func parseQueryInt(q string) int {
 	return v
 }
 
-func applyFilters(data []handlers.CrisisData, year, month, day, hour int) []handlers.CrisisData {
-	if year == -1 && month == -1 && day == -1 && hour == -1 {
+func applyFilters(data []handlers.CrisisData, startYear, startMonth, endYear, endMonth int) []handlers.CrisisData {
+	if startYear == -1 && startMonth == -1 && endYear == -1 && endMonth == -1 {
 		return data
 	}
 	filtered := make([]handlers.CrisisData, 0, len(data))
 	for _, d := range data {
-		if year != -1 && d.Year != year {
-			continue
+		ym := d.Year*100 + d.Month
+		if startYear != -1 {
+			startM := 1
+			if startMonth != -1 {
+				startM = startMonth
+			}
+			if ym < startYear*100+startM {
+				continue
+			}
 		}
-		if month != -1 && d.Month != month {
-			continue
-		}
-		if day != -1 && d.Day != day {
-			continue
-		}
-		if hour != -1 && d.Hour != hour {
-			continue
+		if endYear != -1 {
+			endM := 12
+			if endMonth != -1 {
+				endM = endMonth
+			}
+			if ym > endYear*100+endM {
+				continue
+			}
 		}
 		filtered = append(filtered, d)
 	}
@@ -78,10 +85,26 @@ func main() {
 			mode = "situation"
 		}
 
-		fYear := c.QueryParam("year")
-		fMonth := c.QueryParam("month")
-		fDay := c.QueryParam("day")
-		fHour := c.QueryParam("hour")
+		fStartYear := c.QueryParam("start_year")
+		if fStartYear == "" {
+			fStartYear = "2023"
+		}
+		fStartMonth := c.QueryParam("start_month")
+		if fStartMonth == "" {
+			fStartMonth = "1"
+		}
+		fEndYear := c.QueryParam("end_year")
+		if fEndYear == "" {
+			fEndYear = "2025"
+		}
+		fEndMonth := c.QueryParam("end_month")
+		if fEndMonth == "" {
+			fEndMonth = "12"
+		}
+		groupBy := c.QueryParam("group_by")
+		if groupBy == "" || groupBy == "all" {
+			groupBy = "month"
+		}
 		typeLevel := c.QueryParam("type_level")
 		if typeLevel == "" {
 			typeLevel = "대분류"
@@ -90,29 +113,36 @@ func main() {
 		if locLevel == "" {
 			locLevel = "대분류"
 		}
+		activeTab := c.QueryParam("tab")
+		switch activeTab {
+		case "timeseries", "type", "location", "weekday", "hourly":
+		default:
+			activeTab = "timeseries"
+		}
 
 		cacheMutex.RLock()
 		allData := cache[mode]
 		cacheMutex.RUnlock()
 
 		// 쿼리값 파싱 + 필터링
-		year := parseQueryInt(fYear)
-		month := parseQueryInt(fMonth)
-		day := parseQueryInt(fDay)
-		hour := parseQueryInt(fHour)
-		filtered := applyFilters(allData, year, month, day, hour)
+		startYear := parseQueryInt(fStartYear)
+		startMonth := parseQueryInt(fStartMonth)
+		endYear := parseQueryInt(fEndYear)
+		endMonth := parseQueryInt(fEndMonth)
+		filtered := applyFilters(allData, startYear, startMonth, endYear, endMonth)
 
 		// 2. 통계 계산 (기존 차트용)
 		monthly, hourly, heatmap, weekdayHeatmap, severityCounts := handlers.GetAggregateStats(filtered)
+		yearlyLabels, yearlyCounts := handlers.GetYearlySeries(filtered)
 
 		// 3. 신규 데이터 추출 (연도 목록, KPI)
 		availableYears := handlers.GetUniqueYears(allData)
-		kpis := handlers.GetDashboardKPIs(filtered, allData, year, month, day)
+		kpis := handlers.GetDashboardKPIs(filtered, allData)
 
 		// 4. 유형 및 위치 분석
 		groupCol := "월"
-		if fMonth != "" {
-			groupCol = "일"
+		if groupBy == "year" {
+			groupCol = "연도"
 		}
 		typeAnalysis := handlers.GetTypeAnalysis(filtered, typeLevel, groupCol)
 		locAnalysis := handlers.GetLocationAnalysis(filtered, locLevel, groupCol)
@@ -120,14 +150,16 @@ func main() {
 		// 5. 렌더링
 		return c.Render(http.StatusOK, "", views.Dashboard(
 			len(filtered),
-			filtered,
 			monthly,
+			yearlyLabels,
+			yearlyCounts,
 			hourly,
 			mode,
-			fYear,
-			fMonth,
-			fDay,
-			fHour,
+			fStartYear,
+			fStartMonth,
+			fEndYear,
+			fEndMonth,
+			groupBy,
 			availableYears,
 			kpis,
 			heatmap,
@@ -135,6 +167,7 @@ func main() {
 			severityCounts,
 			typeLevel,
 			locLevel,
+			activeTab,
 			typeAnalysis,
 			locAnalysis,
 		))
@@ -146,10 +179,26 @@ func main() {
 			mode = "situation"
 		}
 
-		fYear := c.QueryParam("year")
-		fMonth := c.QueryParam("month")
-		fDay := c.QueryParam("day")
-		fHour := c.QueryParam("hour")
+		fStartYear := c.QueryParam("start_year")
+		if fStartYear == "" {
+			fStartYear = "2023"
+		}
+		fStartMonth := c.QueryParam("start_month")
+		if fStartMonth == "" {
+			fStartMonth = "1"
+		}
+		fEndYear := c.QueryParam("end_year")
+		if fEndYear == "" {
+			fEndYear = "2025"
+		}
+		fEndMonth := c.QueryParam("end_month")
+		if fEndMonth == "" {
+			fEndMonth = "12"
+		}
+		groupBy := c.QueryParam("group_by")
+		if groupBy == "" || groupBy == "all" {
+			groupBy = "month"
+		}
 		typeLevel := c.QueryParam("type_level")
 		if typeLevel == "" {
 			typeLevel = "대분류"
@@ -164,15 +213,15 @@ func main() {
 		cacheMutex.RUnlock()
 
 		// 쿼리값 파싱 + 필터링
-		year := parseQueryInt(fYear)
-		month := parseQueryInt(fMonth)
-		day := parseQueryInt(fDay)
-		hour := parseQueryInt(fHour)
-		filtered := applyFilters(allData, year, month, day, hour)
+		startYear := parseQueryInt(fStartYear)
+		startMonth := parseQueryInt(fStartMonth)
+		endYear := parseQueryInt(fEndYear)
+		endMonth := parseQueryInt(fEndMonth)
+		filtered := applyFilters(allData, startYear, startMonth, endYear, endMonth)
 
 		groupCol := "월"
-		if month != -1 {
-			groupCol = "일"
+		if groupBy == "year" {
+			groupCol = "연도"
 		}
 		typeAnalysis := handlers.GetTypeAnalysis(filtered, typeLevel, groupCol)
 		locAnalysis := handlers.GetLocationAnalysis(filtered, locLevel, groupCol)
