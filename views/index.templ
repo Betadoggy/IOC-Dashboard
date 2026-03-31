@@ -35,6 +35,7 @@ templ Dashboard(
 		<script src="https://cdn.tailwindcss.com"></script>
 		<style>
 			@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+			html { font-size: 17px; }
 			body { font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; background-color: #020617; }
 			.js-plotly-plot .plotly .main-svg { background: transparent !important; }
 			.chart-box { height: 350px !important; width: 100% !important; }
@@ -216,7 +217,7 @@ templ Dashboard(
 
 			<section id="tab-panel-type" class="tab-panel hidden">
 				<div class="mb-6">
-					<label class="text-base text-slate-400 font-medium mr-4">분류 단계 (유형):</label>
+					<label class="text-base text-slate-400 font-medium mr-4">분류 단계:</label>
 					<div class="inline-flex space-x-4">
 						for _, level := range []string{"대분류", "중분류", "소분류"} {
 							<label class="flex items-center">
@@ -228,7 +229,7 @@ templ Dashboard(
 				</div>
 				<div class="grid grid-cols-1 gap-8">
 					<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
-						<h4 class="text-lg font-bold mb-4 text-slate-400 flex items-center"><span class="w-1.5 h-1.5 bg-violet-500 rounded-full mr-2"></span>상위 5개 <span id="type-level-text">{ typeLevel }</span></h4>
+						<h4 class="text-lg font-bold mb-4 text-slate-400 flex items-center"><span class="w-1.5 h-1.5 bg-violet-500 rounded-full mr-2"></span><span class="mr-1">상위 5개</span><span id="type-level-text">{ typeLevel }</span></h4>
 						<div id="type-bar-chart" class="chart-box"></div>
 					</div>
 					<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
@@ -265,8 +266,8 @@ templ Dashboard(
 			<section id="tab-panel-location" class="tab-panel hidden">
 				<div class="mb-8">
 					<div class="mb-6">
-						<label class="text-base text-slate-400 font-medium mr-4">분류 단계 (위치):</label>
-						<div class="inline-flex space-x-2">
+						<label class="text-base text-slate-400 font-medium mr-4">분류 단계:</label>
+						<div class="inline-flex space-x-4">
 							for _, level := range []string{"대분류", "중분류"} {
 								<label class="flex items-center">
 									<input type="radio" name="loc_level" value={ level } checked?={ locLevel == level } onchange="updateLocLevel(this.value)" class="mr-2" />
@@ -277,7 +278,7 @@ templ Dashboard(
 					</div>
 					<div class="grid grid-cols-1 gap-8">
 						<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
-							<h4 class="text-lg font-bold mb-4 text-slate-400 flex items-center"><span class="w-1.5 h-1.5 bg-amber-500 rounded-full mr-2"></span>상위 5개 <span id="loc-level-text">{ locLevel }</span></h4>
+							<h4 class="text-lg font-bold mb-4 text-slate-400 flex items-center"><span class="w-1.5 h-1.5 bg-amber-500 rounded-full mr-2"></span><span class="mr-1">상위 5개</span><span id="loc-level-text">{ locLevel }</span></h4>
 							<div id="loc-bar-chart" class="chart-box"></div>
 						</div>
 						<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
@@ -309,7 +310,8 @@ templ Dashboard(
 						autosize: true,
 						paper_bgcolor: 'rgba(0,0,0,0)',
 						plot_bgcolor: 'rgba(0,0,0,0)',
-						font: { color: '#94a3b8', family: 'Pretendard', size: 14 },
+						font: { color: '#94a3b8', family: 'Pretendard', size: 16 },
+						hoverlabel: { font: { family: 'Pretendard', size: 18 } },
 						margin: { t: 30, r: 40, l: 60, b: 60 },
 						xaxis: { gridcolor: '#1e293b', zeroline: false },
 						yaxis: { gridcolor: '#1e293b', zeroline: false }
@@ -365,7 +367,7 @@ templ Dashboard(
 							y: yearlyCounts,
 							text: yearlyCounts,
 							textposition: 'auto',
-							textfont: { color: '#ffffff', size: 14 },
+							textfont: { color: '#ffffff', size: 16 },
 							type: 'bar',
 							marker: { color: '#3B82F6' }
 						}], {
@@ -435,16 +437,17 @@ templ Dashboard(
 					}], {
 						paper_bgcolor: 'rgba(0,0,0,0)',
 						plot_bgcolor: 'rgba(0,0,0,0)',
-						font: { color: '#94a3b8', family: 'Pretendard' },
-						margin: { t: 30, r: 20, l: 20, b: 70 },
+						font: { color: '#94a3b8', family: 'Pretendard', size: 16 },
+						hoverlabel: { font: { family: 'Pretendard', size: 18 } },
+						margin: { t: 30, r: 160, l: 20, b: 80 },
 						showlegend: true,
-						legend: { orientation: 'h', y: -0.2, x: 0.5, xanchor: 'center' },
+						legend: { orientation: 'v', y: 0.5, x: 1.02, yanchor: 'middle', xanchor: 'left' },
 						annotations: severityEntries.length > 0 ? [] : [{
 							text: '데이터 없음',
 							x: 0.5,
 							y: 0.5,
 							showarrow: false,
-							font: { color: '#64748b', size: 16 }
+							font: { color: '#64748b', size: 18 }
 						}]
 					}, config);
 
@@ -519,7 +522,7 @@ templ Dashboard(
 							y: topTypeCounts,
 							text: topTypeCounts,
 							textposition: 'auto',
-							textfont: { color: '#ffffff', size: 12 },
+							textfont: { color: '#ffffff', size: 14 },
 							type: 'bar',
 							marker: { color: typeColors }
 						}], commonLayout, config);
@@ -565,7 +568,7 @@ templ Dashboard(
 							y: topLocCounts,
 							text: topLocCounts,
 							textposition: 'auto',
-							textfont: { color: '#ffffff', size: 12 },
+							textfont: { color: '#ffffff', size: 14 },
 							type: 'bar',
 							marker: { color: locColors }
 						}], commonLayout, config);
@@ -631,7 +634,7 @@ templ Dashboard(
 								y: topTypeCounts,
 								text: topTypeCounts,
 								textposition: 'auto',
-								textfont: { color: '#ffffff', size: 12 },
+								textfont: { color: '#ffffff', size: 14 },
 								type: 'bar',
 								marker: { color: typeColors }
 							}], commonLayout, config);
@@ -677,7 +680,7 @@ templ Dashboard(
 								y: topLocCounts,
 								text: topLocCounts,
 								textposition: 'auto',
-								textfont: { color: '#ffffff', size: 12 },
+								textfont: { color: '#ffffff', size: 14 },
 								type: 'bar',
 								marker: { color: locColors }
 							}], commonLayout, config);
