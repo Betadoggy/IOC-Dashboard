@@ -33,5 +33,5 @@ go install github.com/air-verse/air@latest
 
 Golang 빌드(현재 폴더 내 실행 파일 생성)
 ```
-go build -o build .
+go build -o build.exe .
 ```
