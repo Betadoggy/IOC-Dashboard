@@ -70,7 +70,6 @@ templ Dashboard(
 				</section>
 
 				<section class="space-y-4">
-					<p class="px-2 text-sm font-bold text-slate-500 uppercase mb-3">데이터 필터</p>
 					<form method="GET" action="/" class="space-y-4" id="filter-form" onsubmit="document.getElementById('current-tab-input').value = currentTab;">
 						<input type="hidden" name="mode" value={ currentMode } />
 						<input type="hidden" name="type_level" value={ typeLevel } />
@@ -121,9 +120,6 @@ templ Dashboard(
 							검색하기
 						</button>
 
-						<div class="pt-2 text-center border-t border-slate-800 mt-4">
-							<a href={ templ.URL("/?mode=" + currentMode) } class="text-sm text-slate-500 hover:text-blue-500 underline transition-colors">필터 초기화</a>
-						</div>
 					</form>
 				</section>
 
@@ -150,7 +146,7 @@ templ Dashboard(
 							</p>
 						</div>
 						<div class="bg-slate-950 rounded-lg px-3 py-3 border border-slate-800 border-l-4 border-l-emerald-500">
-							<p class="text-sm text-slate-500 uppercase tracking-normal">최다 발생 유형(대분류)</p>
+							<p class="text-sm text-slate-500 uppercase tracking-normal">최다 발생 유형 (대분류)</p>
 							<p class="text-2xl font-black text-white mt-0.5 truncate">{ kpi.TopType }</p>
 						</div>
 						<div class="bg-slate-950 rounded-lg px-3 py-3 border border-slate-800 border-l-4 border-l-cyan-500">
