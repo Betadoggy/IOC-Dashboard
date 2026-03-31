@@ -194,19 +194,23 @@ templ Dashboard(
 			</header>
 
 			<section id="tab-panel-timeseries" class="tab-panel space-y-8">
-				<div class="grid grid-cols-1 gap-8">
-					<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
-						<h3 class="text-lg font-bold mb-4 text-slate-400 flex items-center">
-							<span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></span>발생 추이
-						</h3>
-						<div id="month-chart" class="chart-box"></div>
-					</div>
-					<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
-						<h3 class="text-lg font-bold mb-4 text-slate-400 flex items-center">
-							<span class="w-1.5 h-1.5 bg-red-500 rounded-full mr-2"></span>이벤트 등급 분포
-						</h3>
-						<div id="severity-donut-chart" class="chart-box" style="height: 450px !important;"></div>
-					</div>
+				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
+					<h3 class="text-lg font-bold mb-4 text-slate-400 flex items-center">
+						<span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></span>발생 추이
+					</h3>
+					<div id="month-chart" class="chart-box"></div>
+				</div>
+				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
+					<h3 class="text-lg font-bold mb-4 text-slate-400 flex items-center">
+						<span class="w-1.5 h-1.5 bg-teal-500 rounded-full mr-2"></span>등급 단계별 분포
+					</h3>
+					<div id="severity-half-donut-chart" style="height: 250px; width: 100%; overflow: visible;"></div>
+				</div>
+				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
+					<h3 class="text-lg font-bold mb-4 text-slate-400 flex items-center">
+						<span class="w-1.5 h-1.5 bg-red-500 rounded-full mr-2"></span>이벤트 등급 분포
+					</h3>
+					<div id="severity-donut-chart" class="chart-box" style="height: 450px !important;"></div>
 				</div>
 
 			</section>
@@ -316,7 +320,7 @@ templ Dashboard(
 
 					const tabButtons = document.querySelectorAll('.dashboard-tab');
 					const tabPanels = document.querySelectorAll('.tab-panel');
-					const plotIds = ['month-chart', 'hour-chart', 'severity-donut-chart', 'heatmap-chart', 'weekday-heatmap-chart', 'type-bar-chart', 'type-line-chart', 'loc-bar-chart', 'loc-line-chart'];
+					const plotIds = ['month-chart', 'hour-chart', 'severity-donut-chart', 'severity-half-donut-chart', 'heatmap-chart', 'weekday-heatmap-chart', 'type-bar-chart', 'type-line-chart', 'loc-bar-chart', 'loc-line-chart'];
 					let currentTab = 'timeseries';
 
 					function activateTab(tabName) {
@@ -445,6 +449,84 @@ templ Dashboard(
 							showarrow: false,
 							font: { color: '#64748b', size: 18 }
 						}]
+					}, config);
+
+					// 등급 단계별 누적 막대 차트
+					const gradeOrder = ['일반', '관심', '주의', '경계', '심각'];
+					const gradeColorMap = {
+						'일반': '#14b8a6',
+						'관심': '#3b82f6',
+						'주의': '#f59e0b',
+						'경계': '#f97316',
+						'심각': '#dc2626'
+					};
+					const gradeValues = gradeOrder.map(g => severityCounts[g] || 0);
+					const gradeTotal = gradeValues.reduce((a, b) => a + b, 0);
+					const gradeTraces = gradeOrder.map((g, i) => ({
+						name: g,
+						x: [gradeValues[i]],
+						y: ['등급'],
+						type: 'bar',
+						orientation: 'h',
+						legendrank: i + 1,
+						marker: { color: gradeColorMap[g] },
+						text: [''],
+						textposition: 'none',
+						hovertemplate: g + ': %{x}건<extra></extra>'
+					}));
+					// 세그먼트 위치 직접 계산 → 좁은 구간은 화살표 선 외부 라벨
+					const minRatio = 0.06;
+					let cumX = 0;
+					let outsideIdx = 0;
+					const gradeAnnotations = [];
+					gradeOrder.forEach((g, i) => {
+						const val = gradeValues[i];
+						if (val === 0) { cumX += val; return; }
+						const ratio = gradeTotal > 0 ? val / gradeTotal : 0;
+						const segCenter = cumX + val / 2;
+						const labelText = g + '<br>' + (ratio * 100).toFixed(1) + '%';
+						if (ratio >= minRatio) {
+							gradeAnnotations.push({
+								x: segCenter, xref: 'x',
+								y: '등급', yref: 'y',
+								text: labelText,
+								showarrow: false,
+								font: { color: '#ffffff', size: 16, family: 'Pretendard' },
+								xanchor: 'center', yanchor: 'middle'
+							});
+						} else {
+							const ay = outsideIdx % 2 === 0 ? -52 : 52;
+							outsideIdx++;
+							gradeAnnotations.push({
+								x: segCenter, xref: 'x',
+								y: '등급', yref: 'y',
+								text: labelText,
+								showarrow: true,
+								arrowhead: 2,
+								arrowsize: 0.8,
+								arrowwidth: 1.5,
+								arrowcolor: gradeColorMap[g],
+								ax: 0, axref: 'pixel',
+								ay: ay, ayref: 'pixel',
+								font: { color: '#94a3b8', size: 16, family: 'Pretendard' },
+								xanchor: 'center',
+								yanchor: ay < 0 ? 'bottom' : 'top'
+							});
+						}
+						cumX += val;
+					});
+					Plotly.newPlot('severity-half-donut-chart', gradeTraces, {
+						paper_bgcolor: 'rgba(0,0,0,0)',
+						plot_bgcolor: 'rgba(0,0,0,0)',
+						barmode: 'stack',
+						font: { color: '#94a3b8', family: 'Pretendard', size: 16 },
+						hoverlabel: { font: { family: 'Pretendard', size: 18 } },
+						margin: { t: 80, r: 10, l: 10, b: 60 },
+						showlegend: true,
+						legend: { orientation: 'h', y: -0.5, x: 0.5, xanchor: 'center', traceorder: 'normal' },
+						xaxis: { visible: false, fixedrange: true },
+						yaxis: { visible: false, fixedrange: true },
+						annotations: gradeAnnotations
 					}, config);
 
 					Plotly.newPlot('heatmap-chart', [{
@@ -607,6 +689,7 @@ templ Dashboard(
 						Plotly.Plots.resize('month-chart');
 						Plotly.Plots.resize('hour-chart');
 						Plotly.Plots.resize('severity-donut-chart');
+						Plotly.Plots.resize('severity-half-donut-chart');
 						Plotly.Plots.resize('heatmap-chart');
 						Plotly.Plots.resize('weekday-heatmap-chart');
 						Plotly.Plots.resize('type-bar-chart');
