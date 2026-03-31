@@ -8,7 +8,7 @@ Open http://localhost:8080 with your browser to see the result.
 
 [VS Code](https://code.visualstudio.com/sha/download?build=stable&os=win32-x64-user)
 
-[Go Lang](https://go.dev/dl/go1.26.1.windows-amd64.msi)
+[Go 1.26.1](https://go.dev/dl/go1.26.1.windows-amd64.msi)
 
 [Python 3.12.10](https://www.python.org/ftp/python/3.12.10/python-3.12.10-amd64.exe)
 
@@ -16,7 +16,12 @@ Open http://localhost:8080 with your browser to see the result.
 
 ### 명령어
 
-templ설치
+Golang PATH 지정
+```
+$env:Path += ";C:\Users\90915\go\bin"
+```
+
+templ 설치
 ```
 go install github.com/a-h/templ/cmd/templ@latest
 ```
@@ -24,11 +29,6 @@ go install github.com/a-h/templ/cmd/templ@latest
 air 설치
 ```
 go install github.com/air-verse/air@latest
-```
-
-Golang PATH 지정
-```
-$env:Path += ";C:\Users\90915\go\bin"
 ```
 
 Golang 빌드(현재 폴더 이름으로 실행 파일 생성)
