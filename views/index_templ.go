@@ -5,13 +5,13 @@ package views
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import "github.com/a-h/templ"
-import templruntime "github.com/a-h/templ/runtime"
-
 import (
 	"IOC-Dashboard/handlers"
 	"fmt"
 	"strconv"
+
+	"github.com/a-h/templ"
+	templruntime "github.com/a-h/templ/runtime"
 )
 
 // fDay 매개변수가 핸들러에서 넘어온다고 가정하고 구조를 유지합니다.
@@ -535,7 +535,7 @@ func Dashboard(
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "\" class=\"text-sm text-slate-500 hover:text-blue-500 underline transition-colors\">필터 초기화</a></div></form></section><section class=\"border-t border-slate-800 pt-4 pb-2\"><p class=\"px-2 text-sm font-bold text-slate-500 uppercase mb-3\">KPI 지표</p><div class=\"space-y-2\"><div class=\"bg-slate-950 rounded-lg px-3 py-3 border border-slate-800 border-l-4 border-l-blue-500\"><p class=\"text-sm text-slate-500 uppercase tracking-widest\">전체 건수</p><p class=\"text-3xl font-black text-white mt-0.5\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "\" class=\"text-sm text-slate-500 hover:text-blue-500 underline transition-colors\">필터 초기화</a></div></form></section><section class=\"border-t border-slate-800 pt-4 pb-2\"><p class=\"px-2 text-sm font-bold text-slate-500 uppercase mb-3\">KPI 지표</p><div class=\"space-y-2\"><div class=\"bg-slate-950 rounded-lg px-3 py-3 border border-slate-800 border-l-4 border-l-blue-500\"><p class=\"text-sm text-slate-500 uppercase tracking-normal\">전체 건수</p><p class=\"text-3xl font-black text-white mt-0.5\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -548,7 +548,7 @@ func Dashboard(
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, "<span class=\"text-base ml-1 text-slate-500\">건</span></p></div><div class=\"bg-slate-950 rounded-lg px-3 py-3 border border-slate-800 border-l-4 border-l-purple-500\"><p class=\"text-sm text-slate-500 uppercase tracking-widest\">일 평균 발생</p><p class=\"text-3xl font-black text-white mt-0.5\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, "<span class=\"text-base ml-1 text-slate-500\">건</span></p></div><div class=\"bg-slate-950 rounded-lg px-3 py-3 border border-slate-800 border-l-4 border-l-purple-500\"><p class=\"text-sm text-slate-500 uppercase tracking-normal\">일 평균 발생</p><p class=\"text-3xl font-black text-white mt-0.5\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -561,7 +561,7 @@ func Dashboard(
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "<span class=\"text-base ml-1 text-slate-500\">건</span></p></div><div class=\"bg-slate-950 rounded-lg px-3 py-3 border border-slate-800 border-l-4 border-l-orange-500\"><p class=\"text-sm text-slate-500 uppercase tracking-widest\">첨두 시간</p><p class=\"text-3xl font-black text-white mt-0.5\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "<span class=\"text-base ml-1 text-slate-500\">건</span></p></div><div class=\"bg-slate-950 rounded-lg px-3 py-3 border border-slate-800 border-l-4 border-l-orange-500\"><p class=\"text-sm text-slate-500 uppercase tracking-normal\">첨두 시간</p><p class=\"text-3xl font-black text-white mt-0.5\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -585,7 +585,7 @@ func Dashboard(
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "<span class=\"text-base ml-1 text-slate-500\">시</span></p></div><div class=\"bg-slate-950 rounded-lg px-3 py-3 border border-slate-800 border-l-4 border-l-emerald-500\"><p class=\"text-sm text-slate-500 uppercase tracking-widest\">최다 발생 유형(대분류)</p><p class=\"text-2xl font-black text-white mt-0.5 truncate\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "<span class=\"text-base ml-1 text-slate-500\">시</span></p></div><div class=\"bg-slate-950 rounded-lg px-3 py-3 border border-slate-800 border-l-4 border-l-emerald-500\"><p class=\"text-sm text-slate-500 uppercase tracking-normal\">최다 발생 유형(대분류)</p><p class=\"text-2xl font-black text-white mt-0.5 truncate\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -598,7 +598,7 @@ func Dashboard(
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, "</p></div><div class=\"bg-slate-950 rounded-lg px-3 py-3 border border-slate-800 border-l-4 border-l-cyan-500\"><p class=\"text-sm text-slate-500 uppercase tracking-widest\">평균 조치 시간 (MTTR)</p><p class=\"text-3xl font-black text-white mt-0.5\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, "</p></div><div class=\"bg-slate-950 rounded-lg px-3 py-3 border border-slate-800 border-l-4 border-l-cyan-500\"><p class=\"text-sm text-slate-500 uppercase tracking-normal\">평균 조치 시간 (MTTR)</p><p class=\"text-3xl font-black text-white mt-0.5\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -628,7 +628,7 @@ func Dashboard(
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, "<span class=\"text-base ml-1 text-slate-500\">시간</span></p></div><div class=\"bg-slate-950 rounded-lg px-3 py-3 border border-slate-800 border-l-4 border-l-rose-500\"><p class=\"text-sm text-slate-500 uppercase tracking-widest\">무사고 운영 일수 (심각기준)</p><p class=\"text-3xl font-black text-white mt-0.5\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, "<span class=\"text-base ml-1 text-slate-500\">시간</span></p></div><div class=\"bg-slate-950 rounded-lg px-3 py-3 border border-slate-800 border-l-4 border-l-rose-500\"><p class=\"text-sm text-slate-500 uppercase tracking-normal\">무사고 운영 일수 (심각기준)</p><p class=\"text-3xl font-black text-white mt-0.5\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
