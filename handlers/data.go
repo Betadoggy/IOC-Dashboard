@@ -20,6 +20,7 @@ type CrisisData struct {
 	Type       string
 	TypeMain   string
 	Location   string
+	Category   string // 추가: 엑셀 P열의 '이벤트' 또는 '상황' 구분값 저장
 }
 
 func LoadExcel(path string) ([]CrisisData, error) {
@@ -44,30 +45,57 @@ func LoadExcel(path string) ([]CrisisData, error) {
 		}
 
 		for i, row := range rows {
-			if i == 0 || len(row) < 11 {
+			// P열(index 15)까지 안전하게 읽기 위해 길이를 16 이상으로 체크
+			if i == 0 || len(row) < 16 {
 				continue
 			}
 
-			rawTime := strings.TrimSpace(row[2])
+			rawTime := strings.TrimSpace(row[1])
 			t, err := parseFlexTime(rawTime)
 			if err != nil {
 				continue
 			}
 
-			typeParts := strings.Split(row[8], ">")
-			typeMain := ""
-			if len(typeParts) > 0 {
-				typeMain = strings.TrimSpace(typeParts[0])
+			tLarge := ""
+			if len(row) > 8 {
+				tLarge = strings.TrimSpace(row[8])
 			}
 
+			tMedium := ""
+			if len(row) > 9 {
+				tMedium = strings.TrimSpace(row[9])
+			}
+
+			tSmall := ""
+			if len(row) > 10 {
+				tSmall = strings.TrimSpace(row[10])
+			}
+
+			// I, J, K를 다시 ">"로 합쳐서 기존 row[7]처럼 만들기
+			fullType := tLarge
+			if tMedium != "" {
+				fullType += ">" + tMedium
+			}
+			if tSmall != "" {
+				fullType += ">" + tSmall
+			}
+
+			typeMain := tLarge // 기존 로직의 typeParts[0]과 동일한 역할
+
 			rawResolved := ""
-			if len(row) > 3 {
-				rawResolved = strings.TrimSpace(row[3])
+			if len(row) > 2 {
+				rawResolved = strings.TrimSpace(row[2])
 			}
 
 			severity := ""
-			if len(row) > 6 {
-				severity = strings.TrimSpace(row[6])
+			if len(row) > 5 {
+				severity = strings.TrimSpace(row[5])
+			}
+
+			// P열(구분) 데이터 추출 로직 추가
+			category := "상황"   // 기본값
+			if len(row) > 15 { // P열이 존재할 경우
+				category = strings.TrimSpace(row[15])
 			}
 
 			allData = append(allData, CrisisData{
@@ -78,9 +106,10 @@ func LoadExcel(path string) ([]CrisisData, error) {
 				Month:      int(t.Month()),
 				Day:        t.Day(),
 				Hour:       t.Hour(),
-				Type:       row[8],
+				Type:       fullType,
 				TypeMain:   typeMain,
-				Location:   row[10], // row[10] 자체를 사용
+				Location:   row[13],
+				Category:   category, // 매핑
 			})
 		}
 	}
