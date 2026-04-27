@@ -30,7 +30,6 @@ type CategoryMap struct {
 	Small  map[string]string // E열(코드) -> F열(명칭)
 }
 
-// LoadCategoryMap은 assets/category.xlsx 파일을 읽어 매핑 정보를 반환합니다.
 func LoadCategoryMap(path string) (*CategoryMap, error) {
 	f, err := excelize.OpenFile(path)
 	if err != nil {
@@ -44,26 +43,41 @@ func LoadCategoryMap(path string) (*CategoryMap, error) {
 		Small:  make(map[string]string),
 	}
 
-	rows, err := f.GetRows(f.GetSheetList()[0]) // 첫 번째 시트 사용
+	// 첫 번째 시트 이름 가져오기
+	sheetName := f.GetSheetList()[0]
+	rows, err := f.GetRows(sheetName)
 	if err != nil {
 		return nil, err
 	}
 
 	for i, row := range rows {
-		if i == 0 || len(row) < 2 { // 헤더 제외 및 최소 열 체크
+		if i == 0 {
 			continue
+		} // 헤더 스킵
+
+		// 대분류 (A:코드, B:내용)
+		if len(row) >= 2 {
+			k := strings.TrimSpace(row[0])
+			v := strings.TrimSpace(row[1])
+			if k != "" {
+				cm.Main[k] = v
+			}
 		}
-		// 대분류 (A, B)
-		if len(row) > 1 {
-			cm.Main[strings.TrimSpace(row[0])] = strings.TrimSpace(row[1])
+		// 중분류 (C:코드, D:내용) - "1-1" 형태 대응
+		if len(row) >= 4 {
+			k := strings.TrimSpace(row[2])
+			v := strings.TrimSpace(row[3])
+			if k != "" {
+				cm.Medium[k] = v
+			}
 		}
-		// 중분류 (C, D)
-		if len(row) > 3 {
-			cm.Medium[strings.TrimSpace(row[2])] = strings.TrimSpace(row[3])
-		}
-		// 소분류 (E, F)
-		if len(row) > 5 {
-			cm.Small[strings.TrimSpace(row[4])] = strings.TrimSpace(row[5])
+		// 소분류 (E:코드, F:내용) - "1-1-1" 형태 대응
+		if len(row) >= 6 {
+			k := strings.TrimSpace(row[4])
+			v := strings.TrimSpace(row[5])
+			if k != "" {
+				cm.Small[k] = v
+			}
 		}
 	}
 	return cm, nil
@@ -108,18 +122,19 @@ func LoadExcel(path string) ([]CrisisData, error) {
 				continue
 			}
 
-			// 코드값 추출
-			codeLarge := strings.TrimSpace(row[8])
-			codeMedium := ""
-			if len(row) > 9 {
-				codeMedium = strings.TrimSpace(row[9])
-			}
-			codeSmall := ""
-			if len(row) > 10 {
-				codeSmall = strings.TrimSpace(row[10])
-			}
+			// 1. 코드값 추출
+			codeLarge := strings.TrimSpace(row[8]) // 예: "7"
+			rawMedium := strings.TrimSpace(row[9]) // 예: "6"
+			rawSmall := strings.TrimSpace(row[10]) // 예: "5"
 
-			// 텍스트 매핑 (맵에 없으면 코드 그대로 노출)
+			// 2. 매핑 파일(category.xlsx) 형식에 맞게 코드 조합
+			// 중분류 코드는 "대분류-중분류" 형식 (예: "7-6")
+			codeMedium := fmt.Sprintf("%s-%s", codeLarge, rawMedium)
+
+			// 소분류 코드는 "대분류-중분류-소분류" 형식 (예: "7-6-5")
+			codeSmall := fmt.Sprintf("%s-%s", codeMedium, rawSmall)
+
+			// 3. 텍스트 매핑 (위에서 조합한 codeMedium, codeSmall 사용)
 			tLarge := cm.Main[codeLarge]
 			if tLarge == "" {
 				tLarge = codeLarge
@@ -127,12 +142,12 @@ func LoadExcel(path string) ([]CrisisData, error) {
 
 			tMedium := cm.Medium[codeMedium]
 			if tMedium == "" {
-				tMedium = codeMedium
-			}
+				tMedium = rawMedium
+			} // 매핑 실패 시 원본 숫자라도 노출
 
 			tSmall := cm.Small[codeSmall]
 			if tSmall == "" {
-				tSmall = codeSmall
+				tSmall = rawSmall
 			}
 
 			// fullType 조립
