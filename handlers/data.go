@@ -8,7 +8,7 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-// 1. 구조체 정의 (다른 파일에서도 쓰이도록 대문자로 시작)
+// 1. 구조체 정의
 type CrisisData struct {
 	Timestamp  string
 	ResolvedAt string
@@ -20,10 +20,63 @@ type CrisisData struct {
 	Type       string
 	TypeMain   string
 	Location   string
-	Category   string // 추가: 엑셀 P열의 '이벤트' 또는 '상황' 구분값 저장
+	Category   string
+}
+
+// CategoryMap은 숫자 코드를 텍스트로 변환하기 위한 맵입니다.
+type CategoryMap struct {
+	Main   map[string]string // A열(코드) -> B열(명칭)
+	Medium map[string]string // C열(코드) -> D열(명칭)
+	Small  map[string]string // E열(코드) -> F열(명칭)
+}
+
+// LoadCategoryMap은 assets/category.xlsx 파일을 읽어 매핑 정보를 반환합니다.
+func LoadCategoryMap(path string) (*CategoryMap, error) {
+	f, err := excelize.OpenFile(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	cm := &CategoryMap{
+		Main:   make(map[string]string),
+		Medium: make(map[string]string),
+		Small:  make(map[string]string),
+	}
+
+	rows, err := f.GetRows(f.GetSheetList()[0]) // 첫 번째 시트 사용
+	if err != nil {
+		return nil, err
+	}
+
+	for i, row := range rows {
+		if i == 0 || len(row) < 2 { // 헤더 제외 및 최소 열 체크
+			continue
+		}
+		// 대분류 (A, B)
+		if len(row) > 1 {
+			cm.Main[strings.TrimSpace(row[0])] = strings.TrimSpace(row[1])
+		}
+		// 중분류 (C, D)
+		if len(row) > 3 {
+			cm.Medium[strings.TrimSpace(row[2])] = strings.TrimSpace(row[3])
+		}
+		// 소분류 (E, F)
+		if len(row) > 5 {
+			cm.Small[strings.TrimSpace(row[4])] = strings.TrimSpace(row[5])
+		}
+	}
+	return cm, nil
 }
 
 func LoadExcel(path string) ([]CrisisData, error) {
+	// 1. 카테고리 매핑 정보 먼저 로드
+	cm, err := LoadCategoryMap("assets/category.xlsx")
+	if err != nil {
+		// 카테고리 로드 실패 시 에러를 반환하거나 빈 맵으로 진행 (여기서는 에러 반환)
+		return nil, fmt.Errorf("category load fail: %v", err)
+	}
+
 	f, err := excelize.OpenFile(path)
 	if err != nil {
 		return nil, err
@@ -45,7 +98,6 @@ func LoadExcel(path string) ([]CrisisData, error) {
 		}
 
 		for i, row := range rows {
-			// P열(index 15)까지 안전하게 읽기 위해 길이를 16 이상으로 체크
 			if i == 0 || len(row) < 16 {
 				continue
 			}
@@ -56,22 +108,34 @@ func LoadExcel(path string) ([]CrisisData, error) {
 				continue
 			}
 
-			tLarge := ""
-			if len(row) > 8 {
-				tLarge = strings.TrimSpace(row[8])
-			}
-
-			tMedium := ""
+			// 코드값 추출
+			codeLarge := strings.TrimSpace(row[8])
+			codeMedium := ""
 			if len(row) > 9 {
-				tMedium = strings.TrimSpace(row[9])
+				codeMedium = strings.TrimSpace(row[9])
 			}
-
-			tSmall := ""
+			codeSmall := ""
 			if len(row) > 10 {
-				tSmall = strings.TrimSpace(row[10])
+				codeSmall = strings.TrimSpace(row[10])
 			}
 
-			// I, J, K를 다시 ">"로 합쳐서 기존 row[7]처럼 만들기
+			// 텍스트 매핑 (맵에 없으면 코드 그대로 노출)
+			tLarge := cm.Main[codeLarge]
+			if tLarge == "" {
+				tLarge = codeLarge
+			}
+
+			tMedium := cm.Medium[codeMedium]
+			if tMedium == "" {
+				tMedium = codeMedium
+			}
+
+			tSmall := cm.Small[codeSmall]
+			if tSmall == "" {
+				tSmall = codeSmall
+			}
+
+			// fullType 조립
 			fullType := tLarge
 			if tMedium != "" {
 				fullType += ">" + tMedium
@@ -80,7 +144,7 @@ func LoadExcel(path string) ([]CrisisData, error) {
 				fullType += ">" + tSmall
 			}
 
-			typeMain := tLarge // 기존 로직의 typeParts[0]과 동일한 역할
+			typeMain := tLarge
 
 			rawResolved := ""
 			if len(row) > 2 {
@@ -92,9 +156,8 @@ func LoadExcel(path string) ([]CrisisData, error) {
 				severity = strings.TrimSpace(row[5])
 			}
 
-			// P열(구분) 데이터 추출 로직 추가
-			category := "상황"   // 기본값
-			if len(row) > 15 { // P열이 존재할 경우
+			category := "상황"
+			if len(row) > 15 {
 				category = strings.TrimSpace(row[15])
 			}
 
@@ -109,7 +172,7 @@ func LoadExcel(path string) ([]CrisisData, error) {
 				Type:       fullType,
 				TypeMain:   typeMain,
 				Location:   row[13],
-				Category:   category, // 매핑
+				Category:   category,
 			})
 		}
 	}
