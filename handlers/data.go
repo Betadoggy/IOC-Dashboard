@@ -23,7 +23,7 @@ type CrisisData struct {
 	Category   string
 }
 
-// CategoryMap은 숫자 코드를 텍스트로 변환하기 위한 맵입니다.
+// CategoryMap은 코드 번호를 텍스트로 변환하기 위한 맵입니다.
 type CategoryMap struct {
 	Main   map[string]string // A열(코드) -> B열(명칭)
 	Medium map[string]string // C열(코드) -> D열(명칭)

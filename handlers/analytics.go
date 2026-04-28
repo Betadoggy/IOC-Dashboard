@@ -16,14 +16,14 @@ func GetUniqueYears(data []CrisisData) []string {
 			yearMap[d.Year] = true
 		}
 	}
-	var years []int
+	years := make([]int, 0, len(yearMap))
 	for y := range yearMap {
 		years = append(years, y)
 	}
 	sort.Ints(years)
-	var result []string
-	for _, y := range years {
-		result = append(result, strconv.Itoa(y))
+	result := make([]string, len(years))
+	for i, y := range years {
+		result[i] = strconv.Itoa(y)
 	}
 	return result
 }
@@ -75,11 +75,11 @@ func GetYearlySeries(data []CrisisData) ([]string, []int) {
 	}
 	sort.Ints(years)
 
-	labels := make([]string, 0, len(years))
-	counts := make([]int, 0, len(years))
-	for _, year := range years {
-		labels = append(labels, strconv.Itoa(year))
-		counts = append(counts, yearMap[year])
+	labels := make([]string, len(years))
+	counts := make([]int, len(years))
+	for i, year := range years {
+		labels[i] = strconv.Itoa(year)
+		counts[i] = yearMap[year]
 	}
 
 	return labels, counts
@@ -108,7 +108,7 @@ func GetDashboardKPIs(filtered []CrisisData, allData []CrisisData) DashboardKPIs
 		return kpi
 	}
 
-	hCounts := make(map[int]int)
+	hCounts := make(map[int]int, 24)
 	maxH, maxHC := 0, 0
 	tCounts := make(map[string]int)
 	maxT, maxTC := "", 0
@@ -116,16 +116,18 @@ func GetDashboardKPIs(filtered []CrisisData, allData []CrisisData) DashboardKPIs
 	mttrCountByType := make(map[string]int)
 
 	for _, d := range filtered {
-		hCounts[d.Hour]++
-		if hCounts[d.Hour] > maxHC {
-			maxHC = hCounts[d.Hour]
-			maxH = d.Hour
+		h := d.Hour
+		hCounts[h]++
+		if hCounts[h] > maxHC {
+			maxHC = hCounts[h]
+			maxH = h
 		}
 		if d.TypeMain != "" {
-			tCounts[d.TypeMain]++
-			if tCounts[d.TypeMain] > maxTC {
-				maxTC = tCounts[d.TypeMain]
-				maxT = d.TypeMain
+			t := d.TypeMain
+			tCounts[t]++
+			if tCounts[t] > maxTC {
+				maxTC = tCounts[t]
+				maxT = t
 			}
 		}
 
@@ -162,16 +164,14 @@ func GetDashboardKPIs(filtered []CrisisData, allData []CrisisData) DashboardKPIs
 	now := time.Now()
 	var lastSevere *time.Time
 	for _, d := range allData {
-		if d.Severity != "심각" {
-			continue
-		}
-		occurredAt, err := parseFlexTime(d.Timestamp)
-		if err != nil {
-			continue
-		}
-		if lastSevere == nil || occurredAt.After(*lastSevere) {
-			t := occurredAt
-			lastSevere = &t
+		if d.Severity == "심각" {
+			occurredAt, err := parseFlexTime(d.Timestamp)
+			if err == nil {
+				if lastSevere == nil || occurredAt.After(*lastSevere) {
+					t := occurredAt
+					lastSevere = &t
+				}
+			}
 		}
 	}
 	if lastSevere != nil && now.After(*lastSevere) {
@@ -229,6 +229,43 @@ type TypeAnalysis struct {
 	TrendData []TrendPoint
 }
 
+// 위치 분석 구조체 (유형과 동일)
+type LocationAnalysis struct {
+	TopLocations []TypeCount
+	TrendData    []TrendPoint
+}
+
+// 공통 분석 함수
+func getTopAndTrend(typeMap map[string]int, trendMap map[string]map[string]int, topN int) ([]TypeCount, []TrendPoint) {
+	// Top types
+	var topTypes []TypeCount
+	for name, count := range typeMap {
+		topTypes = append(topTypes, TypeCount{Name: name, Count: count})
+	}
+	sort.Slice(topTypes, func(i, j int) bool {
+		return topTypes[i].Count > topTypes[j].Count
+	})
+	if len(topTypes) > topN {
+		topTypes = topTypes[:topN]
+	}
+
+	// Trend data for top types
+	var trendData []TrendPoint
+	topTypeNames := make(map[string]bool, len(topTypes))
+	for _, tt := range topTypes {
+		topTypeNames[tt.Name] = true
+	}
+	for period, types := range trendMap {
+		for name, count := range types {
+			if topTypeNames[name] {
+				trendData = append(trendData, TrendPoint{Period: period, Name: name, Count: count})
+			}
+		}
+	}
+
+	return topTypes, trendData
+}
+
 // 유형별 분석 함수
 func GetTypeAnalysis(filtered []CrisisData, typeLevel string, groupCol string) TypeAnalysis {
 	var typeCol string
@@ -281,39 +318,9 @@ func GetTypeAnalysis(filtered []CrisisData, typeLevel string, groupCol string) T
 		trendMap[period][t]++
 	}
 
-	// Top 5 types
-	var topTypes []TypeCount
-	for name, count := range typeMap {
-		topTypes = append(topTypes, TypeCount{Name: name, Count: count})
-	}
-	sort.Slice(topTypes, func(i, j int) bool {
-		return topTypes[i].Count > topTypes[j].Count
-	})
-	if len(topTypes) > 5 {
-		topTypes = topTypes[:5]
-	}
-
-	// Trend data for top types
-	var trendData []TrendPoint
-	topTypeNames := make(map[string]bool)
-	for _, tt := range topTypes {
-		topTypeNames[tt.Name] = true
-	}
-	for period, types := range trendMap {
-		for name, count := range types {
-			if topTypeNames[name] {
-				trendData = append(trendData, TrendPoint{Period: period, Name: name, Count: count})
-			}
-		}
-	}
+	topTypes, trendData := getTopAndTrend(typeMap, trendMap, 5)
 
 	return TypeAnalysis{TopTypes: topTypes, TrendData: trendData}
-}
-
-// 위치 분석 구조체 (유형과 동일)
-type LocationAnalysis struct {
-	TopLocations []TypeCount
-	TrendData    []TrendPoint
 }
 
 // 위치별 분석 함수
@@ -362,31 +369,7 @@ func GetLocationAnalysis(filtered []CrisisData, locLevel string, groupCol string
 		trendMap[period][l]++
 	}
 
-	// Top 5 locations
-	var topLocations []TypeCount
-	for name, count := range locMap {
-		topLocations = append(topLocations, TypeCount{Name: name, Count: count})
-	}
-	sort.Slice(topLocations, func(i, j int) bool {
-		return topLocations[i].Count > topLocations[j].Count
-	})
-	if len(topLocations) > 5 {
-		topLocations = topLocations[:5]
-	}
-
-	// Trend data for top locations
-	var trendData []TrendPoint
-	topLocNames := make(map[string]bool)
-	for _, tl := range topLocations {
-		topLocNames[tl.Name] = true
-	}
-	for period, locs := range trendMap {
-		for name, count := range locs {
-			if topLocNames[name] {
-				trendData = append(trendData, TrendPoint{Period: period, Name: name, Count: count})
-			}
-		}
-	}
+	topLocations, trendData := getTopAndTrend(locMap, trendMap, 5)
 
 	return LocationAnalysis{TopLocations: topLocations, TrendData: trendData}
 }
