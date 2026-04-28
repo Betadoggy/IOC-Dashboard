@@ -51,35 +51,21 @@ func LoadCategoryMap(path string) (*CategoryMap, error) {
 	}
 
 	for i, row := range rows {
-		if i == 0 {
-			continue
-		} // 헤더 스킵
+		if i == 0 { continue } // 헤더 스킵
 
-		// 대분류 (A:코드, B:내용)
-		if len(row) >= 2 {
-			k := strings.TrimSpace(row[0])
-			v := strings.TrimSpace(row[1])
-			if k != "" {
-				cm.Main[k] = v
+		// 헬퍼 함수: 범위 체크 후 맵에 데이터 삽입
+		assign := func(m map[string]string, kIdx, vIdx int) {
+			if len(row) > vIdx {
+				k, v := strings.TrimSpace(row[kIdx]), strings.TrimSpace(row[vIdx])
+				if k != "" { m[k] = v }
 			}
 		}
-		// 중분류 (C:코드, D:내용) - "1-1" 형태 대응
-		if len(row) >= 4 {
-			k := strings.TrimSpace(row[2])
-			v := strings.TrimSpace(row[3])
-			if k != "" {
-				cm.Medium[k] = v
-			}
-		}
-		// 소분류 (E:코드, F:내용) - "1-1-1" 형태 대응
-		if len(row) >= 6 {
-			k := strings.TrimSpace(row[4])
-			v := strings.TrimSpace(row[5])
-			if k != "" {
-				cm.Small[k] = v
-			}
-		}
+
+		assign(cm.Main, 0, 1)   // 대분류 A, B열
+		assign(cm.Medium, 2, 3) // 중분류 C, D열
+		assign(cm.Small, 4, 5)  // 소분류 E, F열
 	}
+
 	return cm, nil
 }
 
@@ -122,59 +108,30 @@ func LoadExcel(path string) ([]CrisisData, error) {
 				continue
 			}
 
-			// 1. 코드값 추출
-			codeLarge := strings.TrimSpace(row[8]) // 예: "7"
-			rawMedium := strings.TrimSpace(row[9]) // 예: "6"
-			rawSmall := strings.TrimSpace(row[10]) // 예: "5"
+			// 1. 값 추출 및 코드 조합 (한 줄씩 정리)
+			cL := strings.TrimSpace(row[8])
+			cM := fmt.Sprintf("%s-%s", cL, strings.TrimSpace(row[9])) // 1-1 형태
+			cS := fmt.Sprintf("%s-%s", cM, strings.TrimSpace(row[10])) // 1-1-1 형태
 
-			// 2. 매핑 파일(category.xlsx) 형식에 맞게 코드 조합
-			// 중분류 코드는 "대분류-중분류" 형식 (예: "7-6")
-			codeMedium := fmt.Sprintf("%s-%s", codeLarge, rawMedium)
-
-			// 소분류 코드는 "대분류-중분류-소분류" 형식 (예: "7-6-5")
-			codeSmall := fmt.Sprintf("%s-%s", codeMedium, rawSmall)
-
-			// 3. 텍스트 매핑 (위에서 조합한 codeMedium, codeSmall 사용)
-			tLarge := cm.Main[codeLarge]
-			if tLarge == "" {
-				tLarge = codeLarge
+			// 2. 매핑 함수 (값이 없으면 원본 코드 반환)
+			getMap := func(m map[string]string, key, raw string) string {
+				if val, ok := m[key]; ok && val != "" { return val }
+				return raw
 			}
 
-			tMedium := cm.Medium[codeMedium]
-			if tMedium == "" {
-				tMedium = rawMedium
-			} // 매핑 실패 시 원본 숫자라도 노출
+			tL, tM, tS := getMap(cm.Main, cL, cL), getMap(cm.Medium, cM, strings.TrimSpace(row[9])), getMap(cm.Small, cS, strings.TrimSpace(row[10]))
 
-			tSmall := cm.Small[codeSmall]
-			if tSmall == "" {
-				tSmall = rawSmall
-			}
+			// 3. fullType 조립 (Slice와 Join 활용)
+			parts := []string{tL}
+			if tM != "" { parts = append(parts, tM) }
+			if tS != "" { parts = append(parts, tS) }
 
-			// fullType 조립
-			fullType := tLarge
-			if tMedium != "" {
-				fullType += ">" + tMedium
-			}
-			if tSmall != "" {
-				fullType += ">" + tSmall
-			}
+			fullType := strings.Join(parts, ">")
+			typeMain := tL
 
-			typeMain := tLarge
-
-			rawResolved := ""
-			if len(row) > 2 {
-				rawResolved = strings.TrimSpace(row[2])
-			}
-
-			severity := ""
-			if len(row) > 5 {
-				severity = strings.TrimSpace(row[5])
-			}
-
-			category := "상황"
-			if len(row) > 15 {
-				category = strings.TrimSpace(row[15])
-			}
+			rawResolved := strings.TrimSpace(row[2])
+			severity := strings.TrimSpace(row[5])
+			category := strings.TrimSpace(row[15])
 
 			allData = append(allData, CrisisData{
 				Timestamp:  rawTime,
@@ -195,16 +152,13 @@ func LoadExcel(path string) ([]CrisisData, error) {
 }
 
 func parseFlexTime(raw string) (time.Time, error) {
-	layouts := []string{
-		"2006-01-02 15:04:05",
-		"2006-01-02 15:04",
-		"01-02-06 15:04:05",
-		"1/2/06 15:04",
-	}
-	for _, l := range layouts {
-		if t, err := time.Parse(l, raw); err == nil {
-			return t, nil
-		}
-	}
-	return time.Time{}, fmt.Errorf("unknown time format")
+    // 특정 레이아웃 파싱, 엑셀에서는 2006-01-02 15:04:05로 보이더라도 실제 처리는 1/2/06 15:04
+    layout := "1/2/06 15:04"
+    
+    t, err := time.Parse(layout, raw)
+    if err != nil {
+        return time.Time{}, fmt.Errorf("invalid time format (expected 1/2/06 15:04): %w", err)
+    }
+    
+    return t, nil
 }
