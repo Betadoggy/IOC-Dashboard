@@ -170,6 +170,8 @@ func main() {
 		yearlyLabels, yearlyCounts := handlers.GetYearlySeries(filtered)
 		availableYears := handlers.GetUniqueYears(allData)
 		kpis := handlers.GetDashboardKPIs(filtered, allData)
+		weekdayTypeHeatmap := handlers.GetWeekdayTypeHeatmap(filtered, 7)
+		weekdayLocationHeatmap := handlers.GetWeekdayLocationHeatmap(filtered, 7)
 
 		groupCol := "월"
 		if groupBy == "year" {
@@ -202,6 +204,8 @@ func main() {
 			activeTab,
 			typeAnalysis,
 			locAnalysis,
+			weekdayTypeHeatmap,
+			weekdayLocationHeatmap,
 		))
 	})
 

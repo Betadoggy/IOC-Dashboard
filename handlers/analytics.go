@@ -373,3 +373,161 @@ func GetLocationAnalysis(filtered []CrisisData, locLevel string, groupCol string
 
 	return LocationAnalysis{TopLocations: topLocations, TrendData: trendData}
 }
+
+// 요일별-유형별 분석 구조체
+type WeekdayTypeHeatmap struct {
+	TypeNames []string
+	Data      [][]int // [weekday][type]
+}
+
+// 요일별-유형별 히트맵 함수
+func GetWeekdayTypeHeatmap(filtered []CrisisData, topN int) WeekdayTypeHeatmap {
+	// 모든 대분류 유형 집계
+	typeMap := make(map[string]int)
+	for _, d := range filtered {
+		var t string
+		parts := strings.Split(d.Type, ">")
+		if len(parts) > 0 {
+			t = strings.TrimSpace(parts[0])
+		}
+		if t == "" {
+			continue
+		}
+		typeMap[t]++
+	}
+
+	// 상위 N개 유형 추출
+	var topTypes []TypeCount
+	for name, count := range typeMap {
+		topTypes = append(topTypes, TypeCount{Name: name, Count: count})
+	}
+	sort.Slice(topTypes, func(i, j int) bool {
+		return topTypes[i].Count > topTypes[j].Count
+	})
+	if len(topTypes) > topN {
+		topTypes = topTypes[:topN]
+	}
+
+	// 유형 이름을 map으로 인덱싱
+	typeIndex := make(map[string]int)
+	typeNames := make([]string, len(topTypes))
+	for i, tt := range topTypes {
+		typeIndex[tt.Name] = i
+		typeNames[i] = tt.Name
+	}
+
+	// 요일별-유형별 히트맵 데이터 생성
+	heatmapData := make([][]int, 7)
+	for i := range heatmapData {
+		heatmapData[i] = make([]int, len(topTypes))
+	}
+
+	// 데이터 집계
+	for _, d := range filtered {
+		if d.Year <= 0 || d.Month < 1 || d.Month > 12 || d.Day < 1 || d.Day > 31 {
+			continue
+		}
+
+		// 요일 계산
+		wd := int(time.Date(d.Year, time.Month(d.Month), d.Day, 0, 0, 0, 0, time.UTC).Weekday())
+
+		// 유형 추출
+		var t string
+		parts := strings.Split(d.Type, ">")
+		if len(parts) > 0 {
+			t = strings.TrimSpace(parts[0])
+		}
+		if t == "" {
+			continue
+		}
+
+		// 상위 유형에 포함되면 증가
+		if idx, ok := typeIndex[t]; ok {
+			heatmapData[wd][idx]++
+		}
+	}
+
+	return WeekdayTypeHeatmap{
+		TypeNames: typeNames,
+		Data:      heatmapData,
+	}
+}
+
+// 요일별-위치별 분석 구조체
+type WeekdayLocationHeatmap struct {
+	LocationNames []string
+	Data          [][]int // [weekday][location]
+}
+
+// 요일별-위치별 히트맵 함수
+func GetWeekdayLocationHeatmap(filtered []CrisisData, topN int) WeekdayLocationHeatmap {
+	// 모든 대분류 위치 집계
+	locationMap := make(map[string]int)
+	for _, d := range filtered {
+		var l string
+		parts := strings.Split(d.Location, ">")
+		if len(parts) > 0 {
+			l = strings.TrimSpace(parts[0])
+		}
+		if l == "" {
+			continue
+		}
+		locationMap[l]++
+	}
+
+	// 상위 N개 위치 추출
+	var topLocations []TypeCount
+	for name, count := range locationMap {
+		topLocations = append(topLocations, TypeCount{Name: name, Count: count})
+	}
+	sort.Slice(topLocations, func(i, j int) bool {
+		return topLocations[i].Count > topLocations[j].Count
+	})
+	if len(topLocations) > topN {
+		topLocations = topLocations[:topN]
+	}
+
+	// 위치 이름을 map으로 인덱싱
+	locationIndex := make(map[string]int)
+	locationNames := make([]string, len(topLocations))
+	for i, tl := range topLocations {
+		locationIndex[tl.Name] = i
+		locationNames[i] = tl.Name
+	}
+
+	// 요일별-위치별 히트맵 데이터 생성
+	heatmapData := make([][]int, 7)
+	for i := range heatmapData {
+		heatmapData[i] = make([]int, len(topLocations))
+	}
+
+	// 데이터 집계
+	for _, d := range filtered {
+		if d.Year <= 0 || d.Month < 1 || d.Month > 12 || d.Day < 1 || d.Day > 31 {
+			continue
+		}
+
+		// 요일 계산
+		wd := int(time.Date(d.Year, time.Month(d.Month), d.Day, 0, 0, 0, 0, time.UTC).Weekday())
+
+		// 위치 추출
+		var l string
+		parts := strings.Split(d.Location, ">")
+		if len(parts) > 0 {
+			l = strings.TrimSpace(parts[0])
+		}
+		if l == "" {
+			continue
+		}
+
+		// 상위 위치에 포함되면 증가
+		if idx, ok := locationIndex[l]; ok {
+			heatmapData[wd][idx]++
+		}
+	}
+
+	return WeekdayLocationHeatmap{
+		LocationNames: locationNames,
+		Data:          heatmapData,
+	}
+}
