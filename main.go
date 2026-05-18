@@ -148,9 +148,7 @@ func main() {
 
 		activeTab := c.QueryParam("tab")
 		switch activeTab {
-		case "timeseries", "type", "location", "weekday", "hourly":
-		default:
-			activeTab = "timeseries"
+		case "timeseries", "type", "location", "weekday", "hourly", "grade":
 		}
 
 		// 해당 모드의 원본 데이터 가져오기

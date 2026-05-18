@@ -190,6 +190,7 @@ templ Dashboard(
             <header class="mb-10">
 				<div class="flex flex-wrap gap-2" id="dashboard-tabs">
 					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-blue-600 border-blue-500 text-white" data-tab-target="timeseries">시계열 통계</button>
+					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-slate-900 border-slate-700 text-slate-300" data-tab-target="grade">등급별 통계</button>
 					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-slate-900 border-slate-700 text-slate-300" data-tab-target="type">유형별 통계</button>
 					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-slate-900 border-slate-700 text-slate-300" data-tab-target="location">위치별 통계</button>
 					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-slate-900 border-slate-700 text-slate-300" data-tab-target="weekday">요일별 통계</button>
@@ -204,6 +205,9 @@ templ Dashboard(
 					</h3>
 					<div id="month-chart" class="chart-box"></div>
 				</div>
+			</section>
+
+			<section id="tab-panel-grade" class="tab-panel hidden space-y-8">
 				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
 					<h3 class="text-lg font-bold mb-4 text-slate-400 flex items-center">
 						<span class="w-1.5 h-1.5 bg-teal-500 rounded-full mr-2"></span>등급 단계별 분포
@@ -216,7 +220,6 @@ templ Dashboard(
 					</h3>
 					<div id="severity-donut-chart" class="chart-box" style="height: 450px !important;"></div>
 				</div>
-
 			</section>
 
 			<section id="tab-panel-type" class="tab-panel hidden">
@@ -445,35 +448,6 @@ templ Dashboard(
 						'정상': '#10b981'
 					};
 					const fallbackSeverityColors = ['#ef4444', '#f97316', '#f59e0b', '#3b82f6', '#14b8a6', '#8b5cf6'];
-					Plotly.newPlot('severity-donut-chart', [{
-						labels: severityEntries.map(([label]) => label),
-						values: severityEntries.map(([, count]) => count),
-						type: 'pie',
-						hole: 0.55,
-						sort: false,
-						textinfo: 'label+percent',
-						hovertemplate: '%{label}: %{value}건<extra></extra>',
-						marker: {
-							colors: severityEntries.map(([label], index) => severityPalette[label] || fallbackSeverityColors[index % fallbackSeverityColors.length])
-						}
-					}], {
-						paper_bgcolor: 'rgba(0,0,0,0)',
-						plot_bgcolor: 'rgba(0,0,0,0)',
-						font: { color: '#94a3b8', family: 'Pretendard', size: 16 },
-						hoverlabel: { font: { family: 'Pretendard', size: 18 } },
-						margin: { t: 30, r: 160, l: 20, b: 80 },
-						showlegend: true,
-						legend: { orientation: 'v', y: 0.5, x: 1.02, yanchor: 'middle', xanchor: 'left' },
-						annotations: severityEntries.length > 0 ? [] : [{
-							text: '데이터 없음',
-							x: 0.5,
-							y: 0.5,
-							showarrow: false,
-							font: { color: '#64748b', size: 18 }
-						}]
-					}, config);
-
-					// 등급 단계별 누적 막대 차트
 					const gradeOrder = ['일반', '관심', '주의', '경계', '심각'];
 					const gradeColorMap = {
 						'일반': '#14b8a6',
@@ -482,7 +456,25 @@ templ Dashboard(
 						'경계': '#f97316',
 						'심각': '#dc2626'
 					};
-					const gradeValues = gradeOrder.map(g => severityCounts[g] || 0);
+					Plotly.newPlot('severity-donut-chart', [{
+				labels: severityEntries.map(([label]) => label),
+				values: severityEntries.map(([, count]) => count),
+				type: 'treemap',
+				branchvalues: 'total',
+				parents: severityEntries.map(() => ''),
+				marker: {
+					colors: severityEntries.map(([label], index) => severityPalette[label] || fallbackSeverityColors[index % fallbackSeverityColors.length])
+				},
+				textinfo: 'label+value+percent entry',
+				hovertemplate: '%{label}: %{value}건<extra></extra>'
+			}], {
+				paper_bgcolor: 'rgba(0,0,0,0)',
+				plot_bgcolor: 'rgba(0,0,0,0)',
+				font: { color: '#94a3b8', family: 'Pretendard', size: 16 },
+				hoverlabel: { font: { family: 'Pretendard', size: 18 } },
+				margin: { t: 30, r: 30, l: 30, b: 30 }
+			}, config);
+			const gradeValues = gradeOrder.map(g => severityCounts[g] || 0);
 					const gradeTotal = gradeValues.reduce((a, b) => a + b, 0);
 					const gradeTraces = gradeOrder.map((g, i) => ({
 						name: g,
@@ -537,18 +529,25 @@ templ Dashboard(
 						}
 						cumX += val;
 					});
-					Plotly.newPlot('severity-half-donut-chart', gradeTraces, {
+					Plotly.newPlot('severity-half-donut-chart', [{
+						labels: gradeOrder,
+						values: gradeValues,
+						type: 'pie',
+						hole: 0.55,
+						sort: false,
+						marker: {
+							colors: gradeOrder.map(g => gradeColorMap[g])
+						},
+						textinfo: 'label+percent',
+						hovertemplate: '%{label}: %{value}건<extra></extra>'
+					}], {
 						paper_bgcolor: 'rgba(0,0,0,0)',
 						plot_bgcolor: 'rgba(0,0,0,0)',
-						barmode: 'stack',
 						font: { color: '#94a3b8', family: 'Pretendard', size: 16 },
 						hoverlabel: { font: { family: 'Pretendard', size: 18 } },
-						margin: { t: 80, r: 10, l: 10, b: 60 },
+						margin: { t: 30, r: 30, l: 30, b: 30 },
 						showlegend: true,
-						legend: { orientation: 'h', y: -0.5, x: 0.5, xanchor: 'center', traceorder: 'normal' },
-						xaxis: { visible: false, fixedrange: true },
-						yaxis: { visible: false, fixedrange: true },
-						annotations: gradeAnnotations
+						legend: { orientation: 'v', y: 0.5, x: 1.02, yanchor: 'middle', xanchor: 'left' }
 					}, config);
 
 					Plotly.newPlot('heatmap-chart', [{
