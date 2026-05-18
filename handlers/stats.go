@@ -3,6 +3,7 @@ package handlers
 import (
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -82,4 +83,55 @@ func GetYearlySeries(data []CrisisData) ([]string, []int) {
 	}
 
 	return labels, counts
+}
+
+type SankeyData struct {
+	Labels  []string
+	Sources []int
+	Targets []int
+	Values  []int
+}
+
+func GetSankeyData(data []CrisisData) SankeyData {
+	countMap := make(map[string]map[string]int)
+	labelIndex := make(map[string]int)
+	labels := make([]string, 0)
+
+	addLabel := func(label string) int {
+		if idx, ok := labelIndex[label]; ok {
+			return idx
+		}
+		idx := len(labels)
+		labels = append(labels, label)
+		labelIndex[label] = idx
+		return idx
+	}
+
+	for _, item := range data {
+		source := strings.TrimSpace(strings.Split(item.RawType, ">")[0])
+		target := strings.TrimSpace(item.TypeMain)
+		if source == "" || target == "" {
+			continue
+		}
+		if countMap[source] == nil {
+			countMap[source] = make(map[string]int)
+		}
+		countMap[source][target]++
+	}
+
+	sources := make([]int, 0)
+	targets := make([]int, 0)
+	values := make([]int, 0)
+
+	for source, targetMap := range countMap {
+		srcIdx := addLabel(source)
+		for target, value := range targetMap {
+			tgtIdx := addLabel(target)
+			sources = append(sources, srcIdx)
+			targets = append(targets, tgtIdx)
+			values = append(values, value)
+		}
+	}
+
+	return SankeyData{Labels: labels, Sources: sources, Targets: targets, Values: values}
 }

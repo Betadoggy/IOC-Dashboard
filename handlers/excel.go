@@ -111,6 +111,7 @@ func LoadExcel(path string) ([]CrisisData, error) {
 
 			fullType := strings.Join(parts, ">")
 			typeMain := tL
+			rawType := strings.TrimSpace(row[7])
 
 			rawResolved := strings.TrimSpace(row[2])
 			severity := strings.TrimSpace(row[5])
@@ -126,6 +127,7 @@ func LoadExcel(path string) ([]CrisisData, error) {
 				Hour:       t.Hour(),
 				Type:       fullType,
 				TypeMain:   typeMain,
+				RawType:    rawType,
 				Location:   row[13],
 				Category:   category,
 			})

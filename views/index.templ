@@ -26,7 +26,8 @@ templ Dashboard(
 	typeAnalysis handlers.TypeAnalysis,
 	locAnalysis handlers.LocationAnalysis,
 	weekdayTypeHeatmap handlers.WeekdayTypeHeatmap,
-	weekdayLocationHeatmap handlers.WeekdayLocationHeatmap) {
+	weekdayLocationHeatmap handlers.WeekdayLocationHeatmap,
+	sankeyData handlers.SankeyData) {
 	<!DOCTYPE html>
 	<html lang="ko">
 	<head>
@@ -57,6 +58,7 @@ templ Dashboard(
 			 data-loc-analysis={ templ.JSONString(locAnalysis) }
 			 data-weekday-type-heatmap={ templ.JSONString(weekdayTypeHeatmap) }
 			 data-weekday-location-heatmap={ templ.JSONString(weekdayLocationHeatmap) }
+			 data-sankey={ templ.JSONString(sankeyData) }
 			 data-active-tab={ activeTab }
 			 style="display: none;"></div>
 
@@ -191,6 +193,7 @@ templ Dashboard(
 				<div class="flex flex-wrap gap-2" id="dashboard-tabs">
 					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-blue-600 border-blue-500 text-white" data-tab-target="timeseries">시계열 통계</button>
 					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-slate-900 border-slate-700 text-slate-300" data-tab-target="grade">등급별 통계</button>
+					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-slate-900 border-slate-700 text-slate-300" data-tab-target="sankey">Sankey</button>
 					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-slate-900 border-slate-700 text-slate-300" data-tab-target="type">유형별 통계</button>
 					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-slate-900 border-slate-700 text-slate-300" data-tab-target="location">위치별 통계</button>
 					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-slate-900 border-slate-700 text-slate-300" data-tab-target="weekday">요일별 통계</button>
@@ -219,6 +222,15 @@ templ Dashboard(
 						<span class="w-1.5 h-1.5 bg-red-500 rounded-full mr-2"></span>이벤트 등급 분포
 					</h3>
 					<div id="severity-donut-chart" class="chart-box" style="height: 450px !important;"></div>
+				</div>
+			</section>
+
+			<section id="tab-panel-sankey" class="tab-panel hidden">
+				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
+					<h3 class="text-lg font-bold mb-4 text-slate-400 flex items-center">
+						<span class="w-1.5 h-1.5 bg-cyan-500 rounded-full mr-2"></span>위기유형 → 대분류 Sankey
+					</h3>
+					<div id="sankey-chart" class="chart-box" style="height: 860px !important;"></div>
 				</div>
 			</section>
 
@@ -330,6 +342,7 @@ templ Dashboard(
 					const severityCounts = JSON.parse(store.getAttribute('data-severity-counts') || '{}');
 					const typeAnalysis = JSON.parse(store.getAttribute('data-type-analysis') || '{}');
 					const locAnalysis = JSON.parse(store.getAttribute('data-loc-analysis') || '{}');
+					const sankeyData = JSON.parse(store.getAttribute('data-sankey') || '{}');
 
 					const commonLayout = {
 						autosize: true,
@@ -345,7 +358,7 @@ templ Dashboard(
 
 					const tabButtons = document.querySelectorAll('.dashboard-tab');
 					const tabPanels = document.querySelectorAll('.tab-panel');
-					const plotIds = ['month-chart', 'hour-chart', 'severity-donut-chart', 'severity-half-donut-chart', 'heatmap-chart', 'weekday-heatmap-chart', 'weekday-type-heatmap-chart', 'weekday-location-heatmap-chart', 'type-bar-chart', 'type-line-chart', 'loc-bar-chart', 'loc-line-chart'];
+					const plotIds = ['month-chart', 'hour-chart', 'severity-donut-chart', 'severity-half-donut-chart', 'sankey-chart', 'heatmap-chart', 'weekday-heatmap-chart', 'weekday-type-heatmap-chart', 'weekday-location-heatmap-chart', 'type-bar-chart', 'type-line-chart', 'loc-bar-chart', 'loc-line-chart'];
 					let currentTab = 'timeseries';
 
 					function activateTab(tabName) {
@@ -435,6 +448,26 @@ templ Dashboard(
 							type: 'category',
 							range: [-0.5, 23.5]
 						}
+					}, config);
+
+					Plotly.newPlot('sankey-chart', [{
+						type: 'sankey',
+						orientation: 'h',
+						node: {
+							pad: 20,
+							thickness: 20,
+							line: { color: '#191127', width: 1 },
+							label: sankeyData.Labels || [],
+							color: sankeyData.Labels ? sankeyData.Labels.map((_, index) => index % 2 === 0 ? '#3B82F6' : '#f97316') : []
+						},
+						link: {
+							source: sankeyData.Sources || [],
+							target: sankeyData.Targets || [],
+							value: sankeyData.Values || []
+						}
+					}], {
+						...commonLayout,
+						margin: { t: 40, l: 40, r: 40, b: 40 }
 					}, config);
 
 					const severityEntries = Object.entries(severityCounts)
@@ -761,6 +794,7 @@ templ Dashboard(
 						Plotly.Plots.resize('hour-chart');
 						Plotly.Plots.resize('severity-donut-chart');
 						Plotly.Plots.resize('severity-half-donut-chart');
+						Plotly.Plots.resize('sankey-chart');
 						Plotly.Plots.resize('heatmap-chart');
 						Plotly.Plots.resize('weekday-heatmap-chart');
 						Plotly.Plots.resize('type-bar-chart');

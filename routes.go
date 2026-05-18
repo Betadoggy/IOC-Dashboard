@@ -109,6 +109,7 @@ func handleDashboard(c echo.Context) error {
 		locAnalysis,
 		weekdayTypeHeatmap,
 		weekdayLocationHeatmap,
+		handlers.GetSankeyData(filtered),
 	))
 }
 

@@ -11,6 +11,7 @@ type CrisisData struct {
 	Hour       int
 	Type       string
 	TypeMain   string
+	RawType    string
 	Location   string
 	Category   string
 }
