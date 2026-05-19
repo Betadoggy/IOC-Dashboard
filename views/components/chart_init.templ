@@ -1,0 +1,136 @@
+package components
+
+templ ChartScripts() {
+	<script>
+		function initMonthHeatmap(monthlyData, heatmapData, groupBy, yearlyLabels, yearlyCounts, hourlyData) {
+			const commonLayout = {
+				autosize: true,
+				paper_bgcolor: 'rgba(0,0,0,0)',
+				plot_bgcolor: 'rgba(0,0,0,0)',
+				font: { color: '#94a3b8', family: 'Pretendard', size: 16 },
+				hoverlabel: { font: { family: 'Pretendard', size: 18 } },
+				margin: { t: 30, r: 40, l: 60, b: 60 },
+				xaxis: { gridcolor: '#1e293b', zeroline: false },
+				yaxis: { gridcolor: '#1e293b', zeroline: false }
+			};
+			const config = { responsive: true, displayModeBar: false };
+
+			if (groupBy === 'year') {
+				Plotly.newPlot('month-chart', [{
+					x: yearlyLabels,
+					y: yearlyCounts,
+					text: yearlyCounts,
+					textposition: 'auto',
+					textfont: { color: '#ffffff', size: 16 },
+					type: 'bar',
+					marker: { color: '#3B82F6' }
+				}], {
+					...commonLayout,
+					xaxis: { ...commonLayout.xaxis, type: 'category' }
+				}, config);
+			} else {
+				Plotly.newPlot('month-chart', [{
+					x: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+					y: monthlyData,
+					type: 'scatter',
+					mode: 'lines+markers',
+					fill: 'tozeroy',
+					line: { shape: 'spline', color: '#3B82F6', width: 3 },
+					marker: { color: '#60a5fa', size: 8 }
+				}], {
+					...commonLayout,
+					xaxis: { ...commonLayout.xaxis, type: 'category', range: [-0.5, 11.5] }
+				}, config);
+			}
+
+			Plotly.newPlot('hour-chart', [{
+				x: Array.from({length: 24}, (_, i) => i + '시'),
+				y: hourlyData,
+				type: 'scatter',
+				mode: 'lines+markers',
+				fill: 'tozeroy',
+				line: { shape: 'spline', color: '#10b981', width: 3 }
+			}], {
+				...commonLayout,
+				xaxis: { ...commonLayout.xaxis, type: 'category', range: [-0.5, 23.5] }
+			}, config);
+
+			// 월별-시간대별 히트맵
+			Plotly.newPlot('heatmap-chart', [{
+				x: Array.from({length: 24}, (_, i) => i + '시'),
+				y: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+				z: heatmapData,
+				type: 'heatmap',
+				colorscale: 'Reds',
+				showscale: true,
+				xgap: 1,
+				ygap: 1
+			}], {
+				...commonLayout,
+				yaxis: { ...commonLayout.yaxis, type: 'category', autorange: 'reversed' }
+			}, config);
+		}
+
+		function initWeekdayHeatmaps(weekdayHeatmapData, weekdayTypeHeatmapData, weekdayLocationHeatmapData) {
+			const commonLayout = {
+				autosize: true,
+				paper_bgcolor: 'rgba(0,0,0,0)',
+				plot_bgcolor: 'rgba(0,0,0,0)',
+				font: { color: '#94a3b8', family: 'Pretendard', size: 16 },
+				hoverlabel: { font: { family: 'Pretendard', size: 18 } },
+				margin: { t: 30, r: 40, l: 60, b: 60 },
+				xaxis: { gridcolor: '#1e293b', zeroline: false },
+				yaxis: { gridcolor: '#1e293b', zeroline: false }
+			};
+			const config = { responsive: true, displayModeBar: false };
+
+			Plotly.newPlot('weekday-heatmap-chart', [{
+				x: Array.from({length: 24}, (_, i) => i + '시'),
+				y: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
+				z: weekdayHeatmapData,
+				type: 'heatmap',
+				colorscale: 'Reds',
+				showscale: true,
+				xgap: 1,
+				ygap: 1
+			}], {
+				...commonLayout,
+				yaxis: { ...commonLayout.yaxis, type: 'category', autorange: 'reversed' }
+			}, config);
+
+			if (weekdayTypeHeatmapData && weekdayTypeHeatmapData.TypeNames && weekdayTypeHeatmapData.TypeNames.length > 0) {
+				Plotly.newPlot('weekday-type-heatmap-chart', [{
+					x: weekdayTypeHeatmapData.TypeNames,
+					y: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
+					z: weekdayTypeHeatmapData.Data,
+					type: 'heatmap',
+					colorscale: 'Reds',
+					showscale: true,
+					xgap: 1,
+					ygap: 1
+				}], {
+					...commonLayout,
+					yaxis: { ...commonLayout.yaxis, type: 'category', autorange: 'reversed' },
+					xaxis: { ...commonLayout.xaxis, tickangle: -45 }
+				}, config);
+			}
+
+			if (weekdayLocationHeatmapData && weekdayLocationHeatmapData.LocationNames && weekdayLocationHeatmapData.LocationNames.length > 0) {
+				Plotly.newPlot('weekday-location-heatmap-chart', [{
+					x: weekdayLocationHeatmapData.LocationNames,
+					y: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
+					z: weekdayLocationHeatmapData.Data,
+					type: 'heatmap',
+					colorscale: 'Reds',
+					showscale: true,
+					xgap: 1,
+					ygap: 1
+				}], {
+					...commonLayout,
+					yaxis: { ...commonLayout.yaxis, type: 'category', autorange: 'reversed' },
+					xaxis: { ...commonLayout.xaxis, tickangle: -45 }
+				}, config);
+			}
+		}
+	</script>
+}

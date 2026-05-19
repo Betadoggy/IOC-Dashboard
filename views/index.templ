@@ -44,6 +44,7 @@ templ Dashboard(
 			.js-plotly-plot .plotly .main-svg { background: transparent !important; }
 			.chart-box { height: 350px !important; width: 100% !important; }
 		</style>
+		@components.ChartScripts()
 	</head>
 	<body class="bg-slate-950 text-slate-200 flex h-screen overflow-hidden">
 		<div id="data-store" 
@@ -169,36 +170,16 @@ templ Dashboard(
             </header>
 
 			<section id="tab-panel-timeseries" class="tab-panel space-y-8">
-				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
-					<h3 class="text-lg font-bold mb-4 text-slate-400 flex items-center">
-						<span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2"></span>발생 추이
-					</h3>
-					<div id="month-chart" class="chart-box"></div>
-				</div>
+				@components.ChartCard("발생 추이", "month-chart", "")
 			</section>
 
 			<section id="tab-panel-grade" class="tab-panel hidden space-y-8">
-				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
-					<h3 class="text-lg font-bold mb-4 text-slate-400 flex items-center">
-						<span class="w-1.5 h-1.5 bg-teal-500 rounded-full mr-2"></span>등급 단계별 분포
-					</h3>
-					<div id="severity-half-donut-chart" style="height: 250px; width: 100%; overflow: visible;"></div>
-				</div>
-				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
-					<h3 class="text-lg font-bold mb-4 text-slate-400 flex items-center">
-						<span class="w-1.5 h-1.5 bg-red-500 rounded-full mr-2"></span>이벤트 등급 분포
-					</h3>
-					<div id="severity-donut-chart" class="chart-box" style="height: 450px !important;"></div>
-				</div>
+				@components.ChartCard("등급 단계별 분포", "severity-half-donut-chart", "height: 250px; width: 100%; overflow: visible;")
+				@components.ChartCard("이벤트 등급 분포", "severity-donut-chart", "height: 450px !important;")
 			</section>
 
 			<section id="tab-panel-sankey" class="tab-panel hidden">
-				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
-					<h3 class="text-lg font-bold mb-4 text-slate-400 flex items-center">
-						<span class="w-1.5 h-1.5 bg-cyan-500 rounded-full mr-2"></span>유형별 분류체계 흐름도
-					</h3>
-					<div id="sankey-chart" class="chart-box" style="height: 860px !important;"></div>
-				</div>
+				@components.ChartCard("유형별 분류체계 흐름도", "sankey-chart", "height: 860px !important;")
 			</section>
 
 			<section id="tab-panel-type" class="tab-panel hidden">
@@ -214,55 +195,24 @@ templ Dashboard(
 					</div>
 				</div>
 				<div class="grid grid-cols-1 gap-8">
-					<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
-						<h4 class="text-lg font-bold mb-4 text-slate-400 flex items-center"><span class="w-1.5 h-1.5 bg-violet-500 rounded-full mr-2"></span><span class="mr-1">상위 5개</span><span id="type-level-text">{ typeLevel }</span></h4>
-						<div id="type-bar-chart" class="chart-box"></div>
-					</div>
-					<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
-						<h4 class="text-lg font-bold mb-4 text-slate-400 flex items-center"><span class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span><span id="type-level-text2">{ typeLevel }</span>별 추이</h4>
-						<div id="type-line-chart" class="chart-box"></div>
-					</div>
+					@components.ChartCard("상위 5개 " + typeLevel, "type-bar-chart", "")
+					@components.ChartCard(typeLevel + "별 추이", "type-line-chart", "")
 				</div>
 			</section>
 
 			<section id="tab-panel-weekday" class="tab-panel hidden">
 			<div class="grid grid-cols-1 gap-8">
-				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
-					<h3 class="text-lg font-bold mb-4 text-slate-400 flex items-center">
-						<span class="w-1.5 h-1.5 bg-rose-500 rounded-full mr-2"></span>요일별-시간대별 분석 히트맵
-					</h3>
-					<div id="weekday-heatmap-chart" class="chart-box" style="height: 560px !important;"></div>
-				</div>
+				@components.ChartCard("요일별-시간대별 분석 히트맵", "weekday-heatmap-chart", "height: 560px !important;")
 				<div class="grid grid-cols-1 gap-8 md:grid-cols-2">
-					<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
-						<h3 class="text-lg font-bold mb-4 text-slate-400 flex items-center">
-							<span class="w-1.5 h-1.5 bg-indigo-500 rounded-full mr-2"></span>요일별-유형별 분석 히트맵
-						</h3>
-						<div id="weekday-type-heatmap-chart" class="chart-box" style="height: 400px !important;"></div>
-					</div>
-					<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
-						<h3 class="text-lg font-bold mb-4 text-slate-400 flex items-center">
-							<span class="w-1.5 h-1.5 bg-cyan-500 rounded-full mr-2"></span>요일별-위치별 분석 히트맵
-						</h3>
-						<div id="weekday-location-heatmap-chart" class="chart-box" style="height: 400px !important;"></div>
-					</div>
+					@components.ChartCard("요일별-유형별 분석 히트맵", "weekday-type-heatmap-chart", "height: 400px !important;")
+					@components.ChartCard("요일별-위치별 분석 히트맵", "weekday-location-heatmap-chart", "height: 400px !important;")
 				</div>
 			</div>
 			</section>
 
 			<section id="tab-panel-hourly" class="tab-panel hidden space-y-8">
-				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
-					<h3 class="text-lg font-bold mb-4 text-slate-400 flex items-center">
-						<span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2"></span>시간대별 추이
-					</h3>
-					<div id="hour-chart" class="chart-box"></div>
-				</div>
-				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
-					<h3 class="text-lg font-bold mb-4 text-slate-400 flex items-center">
-						<span class="w-1.5 h-1.5 bg-orange-500 rounded-full mr-2"></span>월별-시간대별 분석 히트맵
-					</h3>
-					<div id="heatmap-chart" class="chart-box" style="height: 450px !important;"></div>
-				</div>
+				@components.ChartCard("시간대별 추이", "hour-chart", "")
+				@components.ChartCard("월별-시간대별 분석 히트맵", "heatmap-chart", "height: 450px !important;")
 			</section>
 
 			<section id="tab-panel-location" class="tab-panel hidden">
@@ -279,14 +229,8 @@ templ Dashboard(
 						</div>
 					</div>
 					<div class="grid grid-cols-1 gap-8">
-						<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
-							<h4 class="text-lg font-bold mb-4 text-slate-400 flex items-center"><span class="w-1.5 h-1.5 bg-amber-500 rounded-full mr-2"></span><span class="mr-1">상위 5개</span><span id="loc-level-text">{ locLevel }</span></h4>
-							<div id="loc-bar-chart" class="chart-box"></div>
-						</div>
-						<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
-							<h4 class="text-lg font-bold mb-4 text-slate-400 flex items-center"><span class="w-1.5 h-1.5 bg-orange-400 rounded-full mr-2"></span><span id="loc-level-text2">{ locLevel }</span>별 추이</h4>
-							<div id="loc-line-chart" class="chart-box"></div>
-						</div>
+						@components.ChartCard("상위 5개 " + locLevel, "loc-bar-chart", "")
+						@components.ChartCard(locLevel + "별 추이", "loc-line-chart", "")
 					</div>
 				</div>
 			</section>
@@ -366,56 +310,7 @@ templ Dashboard(
 						});
 					});
 
-					if (groupBy === 'year') {
-						Plotly.newPlot('month-chart', [{
-							x: yearlyLabels,
-							y: yearlyCounts,
-							text: yearlyCounts,
-							textposition: 'auto',
-							textfont: { color: '#ffffff', size: 16 },
-							type: 'bar',
-							marker: { color: '#3B82F6' }
-						}], {
-							...commonLayout,
-							xaxis: {
-								...commonLayout.xaxis,
-								type: 'category'
-							}
-						}, config);
-					} else {
-						Plotly.newPlot('month-chart', [{
-							x: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
-							y: monthlyData,
-							type: 'scatter',
-							mode: 'lines+markers',
-							fill: 'tozeroy',
-							line: { shape: 'spline', color: '#3B82F6', width: 3 },
-							marker: { color: '#60a5fa', size: 8 }
-						}], {
-							...commonLayout,
-							xaxis: {
-								...commonLayout.xaxis,
-								type: 'category',
-								range: [-0.5, 11.5]
-							}
-						}, config);
-					}
-
-					Plotly.newPlot('hour-chart', [{
-						x: Array.from({length: 24}, (_, i) => i + '시'),
-						y: hourlyData,
-						type: 'scatter',
-						mode: 'lines+markers',
-						fill: 'tozeroy',
-						line: { shape: 'spline', color: '#10b981', width: 3 }
-					}], {
-						...commonLayout,
-						xaxis: {
-							...commonLayout.xaxis,
-							type: 'category',
-							range: [-0.5, 23.5]
-						}
-					}, config);
+					initMonthHeatmap(monthlyData, heatmapData, groupBy, yearlyLabels, yearlyCounts, hourlyData);
 
 					const sankeyLeftNodes = ['운항', '시설', '여객', '기타 위기유형', '안전보안', '자연재난'];
                     const sankeyRightNodes = ['항공기', '에어사이드시설', '공항운영시설', '여객터미널', '항공보안', '재난'];
@@ -557,91 +452,7 @@ templ Dashboard(
 						legend: { orientation: 'v', y: 0.5, x: 1.02, yanchor: 'middle', xanchor: 'left' }
 					}, config);
 
-					Plotly.newPlot('heatmap-chart', [{
-						x: Array.from({length: 24}, (_, i) => i + '시'),
-						y: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
-						z: heatmapData,
-						type: 'heatmap',
-						colorscale: 'Reds',
-						showscale: true,
-						xgap: 1,
-						ygap: 1
-					}], {
-						...commonLayout,
-						yaxis: {
-							...commonLayout.yaxis,
-							type: 'category',
-							autorange: 'reversed'
-						}
-					}, config);
-
-					Plotly.newPlot('weekday-heatmap-chart', [{
-						x: Array.from({length: 24}, (_, i) => i + '시'),
-						y: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
-						z: weekdayHeatmapData,
-						type: 'heatmap',
-						colorscale: 'Reds',
-						showscale: true,
-						xgap: 1,
-						ygap: 1
-					}], {
-						...commonLayout,
-						yaxis: {
-							...commonLayout.yaxis,
-							type: 'category',
-							autorange: 'reversed'
-						}
-					}, config);
-
-					// 요일별-유형별 히트맵
-					if (weekdayTypeHeatmapData && weekdayTypeHeatmapData.TypeNames && weekdayTypeHeatmapData.TypeNames.length > 0) {
-						Plotly.newPlot('weekday-type-heatmap-chart', [{
-							x: weekdayTypeHeatmapData.TypeNames,
-							y: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
-							z: weekdayTypeHeatmapData.Data,
-							type: 'heatmap',
-							colorscale: 'Reds',
-							showscale: true,
-							xgap: 1,
-							ygap: 1
-						}], {
-							...commonLayout,
-							yaxis: {
-								...commonLayout.yaxis,
-								type: 'category',
-								autorange: 'reversed'
-							},
-							xaxis: {
-								...commonLayout.xaxis,
-								tickangle: -45
-							}
-						}, config);
-					}
-
-					// 요일별-위치별 히트맵
-					if (weekdayLocationHeatmapData && weekdayLocationHeatmapData.LocationNames && weekdayLocationHeatmapData.LocationNames.length > 0) {
-						Plotly.newPlot('weekday-location-heatmap-chart', [{
-							x: weekdayLocationHeatmapData.LocationNames,
-							y: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
-							z: weekdayLocationHeatmapData.Data,
-							type: 'heatmap',
-							colorscale: 'Reds',
-							showscale: true,
-							xgap: 1,
-							ygap: 1
-						}], {
-							...commonLayout,
-							yaxis: {
-								...commonLayout.yaxis,
-								type: 'category',
-								autorange: 'reversed'
-							},
-							xaxis: {
-								...commonLayout.xaxis,
-								tickangle: -45
-							}
-						}, config);
-					}
+					initWeekdayHeatmaps(weekdayHeatmapData, weekdayTypeHeatmapData, weekdayLocationHeatmapData);
 
 					// 색 계산 함수
 					function getTypeColors(values) {
