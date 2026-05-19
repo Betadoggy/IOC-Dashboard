@@ -193,11 +193,11 @@ templ Dashboard(
 				<div class="flex flex-wrap gap-2" id="dashboard-tabs">
 					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-blue-600 border-blue-500 text-white" data-tab-target="timeseries">시계열 통계</button>
 					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-slate-900 border-slate-700 text-slate-300" data-tab-target="grade">등급별 통계</button>
-					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-slate-900 border-slate-700 text-slate-300" data-tab-target="sankey">Sankey</button>
 					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-slate-900 border-slate-700 text-slate-300" data-tab-target="type">유형별 통계</button>
 					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-slate-900 border-slate-700 text-slate-300" data-tab-target="location">위치별 통계</button>
 					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-slate-900 border-slate-700 text-slate-300" data-tab-target="weekday">요일별 통계</button>
 					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-slate-900 border-slate-700 text-slate-300" data-tab-target="hourly">시간대별 통계</button>
+					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-slate-900 border-slate-700 text-slate-300" data-tab-target="sankey">분류체계 흐름</button>
 				</div>
 			</header>
 
@@ -228,7 +228,7 @@ templ Dashboard(
 			<section id="tab-panel-sankey" class="tab-panel hidden">
 				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
 					<h3 class="text-lg font-bold mb-4 text-slate-400 flex items-center">
-						<span class="w-1.5 h-1.5 bg-cyan-500 rounded-full mr-2"></span>위기유형 → 대분류 Sankey
+						<span class="w-1.5 h-1.5 bg-cyan-500 rounded-full mr-2"></span>유형별 분류체계 흐름도
 					</h3>
 					<div id="sankey-chart" class="chart-box" style="height: 860px !important;"></div>
 				</div>
@@ -450,7 +450,10 @@ templ Dashboard(
 						}
 					}, config);
 
-					Plotly.newPlot('sankey-chart', [{
+					const sankeyLeftNodes = ['운항', '시설', '여객', '기타 위기유형', '안전보안', '자연재난'];
+                    const sankeyRightNodes = ['항공기', '에어사이드시설', '공항운영시설', '여객터미널', '항공보안', '재난'];
+
+                    Plotly.newPlot('sankey-chart', [{
 						type: 'sankey',
 						orientation: 'h',
 						node: {
@@ -458,29 +461,33 @@ templ Dashboard(
 							thickness: 20,
 							line: { color: '#191127', width: 1 },
 							label: sankeyData.Labels || [],
-							color: sankeyData.Labels ? sankeyData.Labels.map((_, index) => index % 2 === 0 ? '#3B82F6' : '#f97316') : []
+							color: sankeyData.Labels ? sankeyData.Labels.map(label => sankeyLeftNodes.includes(label)
+                                ? '#3B82F6'
+                                : sankeyRightNodes.includes(label)
+                                    ? '#f97316'
+                                    : '#94a3b8') : []
 						},
 						link: {
 							source: sankeyData.Sources || [],
 							target: sankeyData.Targets || [],
-							value: sankeyData.Values || []
+							value: sankeyData.Values || [],
+							color: sankeyData.Sources ? sankeyData.Sources.map(() => 'rgba(139,92,246,0.3)') : []
 						}
 					}], {
 						...commonLayout,
 						margin: { t: 40, l: 40, r: 40, b: 40 }
 					}, config);
-
-					const severityEntries = Object.entries(severityCounts)
-						.filter(([, count]) => count > 0)
-						.sort((left, right) => right[1] - left[1]);
-					const severityPalette = {
-						'심각': '#dc2626',
-						'경고': '#f97316',
-						'주의': '#f59e0b',
-						'보통': '#3b82f6',
-						'정상': '#10b981'
-					};
-					const fallbackSeverityColors = ['#ef4444', '#f97316', '#f59e0b', '#3b82f6', '#14b8a6', '#8b5cf6'];
+                    const severityEntries = Object.entries(severityCounts)
+                        .filter(([, count]) => count > 0)
+                        .sort((left, right) => right[1] - left[1]);
+                    const severityPalette = {
+                        '심각': '#dc2626',
+                        '경고': '#f97316',
+                        '주의': '#f59e0b',
+                        '보통': '#3b82f6',
+                        '정상': '#10b981'
+                    };
+                    const fallbackSeverityColors = ['#ef4444', '#f97316', '#f59e0b', '#3b82f6', '#14b8a6', '#8b5cf6'];
 					const gradeOrder = ['일반', '관심', '주의', '경계', '심각'];
 					const gradeColorMap = {
 						'일반': '#14b8a6',
