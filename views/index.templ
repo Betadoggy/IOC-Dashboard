@@ -195,8 +195,8 @@ templ Dashboard(
 					</div>
 				</div>
 				<div class="grid grid-cols-1 gap-8">
-					@components.ChartCard("상위 5개 " + typeLevel, "type-bar-chart", "")
-					@components.ChartCard(typeLevel + "별 추이", "type-line-chart", "")
+					@components.ChartCard("상위 5개 분류", "type-bar-chart", "")
+					@components.ChartCard("분류별 추이", "type-line-chart", "")
 				</div>
 			</section>
 
@@ -229,8 +229,8 @@ templ Dashboard(
 						</div>
 					</div>
 					<div class="grid grid-cols-1 gap-8">
-						@components.ChartCard("상위 5개 " + locLevel, "loc-bar-chart", "")
-						@components.ChartCard(locLevel + "별 추이", "loc-line-chart", "")
+						@components.ChartCard("상위 5개 분류", "loc-bar-chart", "")
+						@components.ChartCard("분류별 추이", "loc-line-chart", "")
 					</div>
 				</div>
 			</section>
@@ -688,15 +688,13 @@ templ Dashboard(
 					// 라디오 버튼 변경 함수
 					window.updateTypeLevel = function(level) {
 						currentTypeLevel = level;
-						document.getElementById('type-level-text').textContent = level;
-						document.getElementById('type-level-text2').textContent = level;
+						document.querySelector('input[name="type_level"]').value = level;
 						fetchAnalysis();
 					};
 
 					window.updateLocLevel = function(level) {
 						currentLocLevel = level;
-						document.getElementById('loc-level-text').textContent = level;
-						document.getElementById('loc-level-text2').textContent = level;
+						document.querySelector('input[name="loc_level"]').value = level;
 						fetchAnalysis();
 					};
 
