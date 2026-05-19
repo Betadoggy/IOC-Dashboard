@@ -72,7 +72,7 @@ func handleDashboard(c echo.Context) error {
 	monthly, hourly, heatmap, weekdayHeatmap, severityCounts := handlers.GetAggregateStats(filtered)
 	yearlyLabels, yearlyCounts := handlers.GetYearlySeries(filtered)
 	availableYears := handlers.GetUniqueYears(allData)
-	kpis := handlers.GetDashboardKPIs(filtered, allData)
+	kpis := handlers.GetDashboardKPIs(filtered, allData, typeLevel)
 	weekdayTypeHeatmap := handlers.GetWeekdayTypeHeatmap(filtered, 7)
 	weekdayLocationHeatmap := handlers.GetWeekdayLocationHeatmap(filtered, 7)
 
@@ -165,9 +165,11 @@ func handleAnalysisAPI(c echo.Context) error {
 
 	typeAnalysis := handlers.GetTypeAnalysis(filtered, typeLevel, groupCol)
 	locAnalysis := handlers.GetLocationAnalysis(filtered, locLevel, groupCol)
+	kpis := handlers.GetDashboardKPIs(filtered, allData, typeLevel)
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"typeAnalysis": typeAnalysis,
 		"locAnalysis":  locAnalysis,
+		"mttrByType":   kpis.MTTRByType,
 	})
 }

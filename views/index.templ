@@ -165,9 +165,9 @@ templ Dashboard(
 		</aside>
 
 		<main class="flex-1 overflow-y-auto p-8 bg-slate-950/50">
-            <header class="mb-10">
-                @components.DashboardTabs(activeTab)
-            </header>
+			<header class="mb-10">
+				@components.DashboardTabs(activeTab)
+			</header>
 
 			<section id="tab-panel-timeseries" class="tab-panel space-y-8">
 				@components.ChartCard("발생 추이", "month-chart", "")
@@ -198,16 +198,53 @@ templ Dashboard(
 					@components.ChartCard("상위 5개 분류", "type-bar-chart", "")
 					@components.ChartCard("분류별 추이", "type-line-chart", "")
 				</div>
+
+				<div class="mt-8 bg-slate-900 border border-slate-800 p-6 rounded-xl shadow-2xl">
+					<div class="flex items-center justify-between mb-4">
+						<h3 class="text-lg font-bold text-white flex items-center gap-2">
+							분류 유형별 평균 조치 시간 (MTTR)
+						</h3>
+					</div>
+					
+					<div class="overflow-x-auto rounded-lg border border-slate-800">
+						<table id="mttrTable" class="min-w-full divide-y divide-slate-800 text-sm">
+							<thead class="bg-slate-950">
+								<tr>
+									<th scope="col" onclick="sortMTTRTable(0)" class="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-slate-800 select-none group">
+										분류 유형 
+										<span id="sortIcon0" class="inline-block ml-1 text-slate-600 group-hover:text-slate-400"></span>
+									</th>
+									<th scope="col" onclick="sortMTTRTable(1)" class="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer hover:bg-slate-800 select-none group">
+										평균 조치 시간 
+										<span id="sortIcon1" class="inline-block ml-1 text-slate-600 group-hover:text-slate-400"></span>
+									</th>
+								</tr>
+							</thead>
+							<tbody class="bg-slate-900 divide-y divide-slate-800">
+								for typeName, mttrVal := range kpi.MTTRByType {
+									<tr class="hover:bg-slate-800/50 transition-colors">
+										<td class="px-6 py-4 whitespace-nowrap font-medium text-slate-200">
+											{ typeName }
+										</td>
+										<td class="px-6 py-4 whitespace-nowrap text-slate-400 font-mono" data-value={ fmt.Sprintf("%f", mttrVal) }>
+											{ fmt.Sprintf("%.2f 시간", mttrVal) }
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				</div>
 			</section>
 
 			<section id="tab-panel-weekday" class="tab-panel hidden">
-			<div class="grid grid-cols-1 gap-8">
-				@components.ChartCard("요일별-시간대별 분석 히트맵", "weekday-heatmap-chart", "height: 560px !important;")
-				<div class="grid grid-cols-1 gap-8 md:grid-cols-2">
-					@components.ChartCard("요일별-유형별 분석 히트맵", "weekday-type-heatmap-chart", "height: 400px !important;")
-					@components.ChartCard("요일별-위치별 분석 히트맵", "weekday-location-heatmap-chart", "height: 400px !important;")
+				<div class="grid grid-cols-1 gap-8">
+					@components.ChartCard("요일별-시간대별 분석 히트맵", "weekday-heatmap-chart", "height: 560px !important;")
+					<div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+						@components.ChartCard("요일별-유형별 분석 히트맵", "weekday-type-heatmap-chart", "height: 400px !important;")
+						@components.ChartCard("요일별-위치별 분석 히트맵", "weekday-location-heatmap-chart", "height: 400px !important;")
+					</div>
 				</div>
-			</div>
 			</section>
 
 			<section id="tab-panel-hourly" class="tab-panel hidden space-y-8">
@@ -313,9 +350,9 @@ templ Dashboard(
 					initMonthHeatmap(monthlyData, heatmapData, groupBy, yearlyLabels, yearlyCounts, hourlyData);
 
 					const sankeyLeftNodes = ['운항', '시설', '여객', '기타 위기유형', '안전보안', '자연재난'];
-                    const sankeyRightNodes = ['항공기', '에어사이드시설', '공항운영시설', '여객터미널', '항공보안', '재난'];
+					const sankeyRightNodes = ['항공기', '에어사이드시설', '공항운영시설', '여객터미널', '항공보안', '재난'];
 
-                    Plotly.newPlot('sankey-chart', [{
+					Plotly.newPlot('sankey-chart', [{
 						type: 'sankey',
 						orientation: 'h',
 						node: {
@@ -324,10 +361,10 @@ templ Dashboard(
 							line: { color: '#191127', width: 1 },
 							label: sankeyData.Labels || [],
 							color: sankeyData.Labels ? sankeyData.Labels.map(label => sankeyLeftNodes.includes(label)
-                                ? '#3B82F6'
-                                : sankeyRightNodes.includes(label)
-                                    ? '#f97316'
-                                    : '#94a3b8') : []
+								? '#3B82F6'
+								: sankeyRightNodes.includes(label)
+									? '#f97316'
+									: '#94a3b8') : []
 						},
 						link: {
 							source: sankeyData.Sources || [],
@@ -339,17 +376,18 @@ templ Dashboard(
 						...commonLayout,
 						margin: { t: 40, l: 40, r: 40, b: 40 }
 					}, config);
-                    const severityEntries = Object.entries(severityCounts)
-                        .filter(([, count]) => count > 0)
-                        .sort((left, right) => right[1] - left[1]);
-                    const severityPalette = {
-                        '심각': '#dc2626',
-                        '경고': '#f97316',
-                        '주의': '#f59e0b',
-                        '보통': '#3b82f6',
-                        '정상': '#10b981'
-                    };
-                    const fallbackSeverityColors = ['#ef4444', '#f97316', '#f59e0b', '#3b82f6', '#14b8a6', '#8b5cf6'];
+
+					const severityEntries = Object.entries(severityCounts)
+						.filter(([, count]) => count > 0)
+						.sort((left, right) => right[1] - left[1]);
+					const severityPalette = {
+						'심각': '#dc2626',
+						'경고': '#f97316',
+						'주의': '#f59e0b',
+						'보통': '#3b82f6',
+						'정상': '#10b981'
+					};
+					const fallbackSeverityColors = ['#ef4444', '#f97316', '#f59e0b', '#3b82f6', '#14b8a6', '#8b5cf6'];
 					const gradeOrder = ['일반', '관심', '주의', '경계', '심각'];
 					const gradeColorMap = {
 						'일반': '#14b8a6',
@@ -358,38 +396,29 @@ templ Dashboard(
 						'경계': '#f97316',
 						'심각': '#dc2626'
 					};
+
 					Plotly.newPlot('severity-donut-chart', [{
-				labels: severityEntries.map(([label]) => label),
-				values: severityEntries.map(([, count]) => count),
-				type: 'treemap',
-				branchvalues: 'total',
-				parents: severityEntries.map(() => ''),
-				marker: {
-					colors: severityEntries.map(([label], index) => severityPalette[label] || fallbackSeverityColors[index % fallbackSeverityColors.length])
-				},
-				textinfo: 'label+value+percent entry',
-				hovertemplate: '%{label}: %{value}건<extra></extra>'
-			}], {
-				paper_bgcolor: 'rgba(0,0,0,0)',
-				plot_bgcolor: 'rgba(0,0,0,0)',
-				font: { color: '#94a3b8', family: 'Pretendard', size: 16 },
-				hoverlabel: { font: { family: 'Pretendard', size: 18 } },
-				margin: { t: 30, r: 30, l: 30, b: 30 }
-			}, config);
-			const gradeValues = gradeOrder.map(g => severityCounts[g] || 0);
+						labels: severityEntries.map(([label]) => label),
+						values: severityEntries.map(([, count]) => count),
+						type: 'treemap',
+						branchvalues: 'total',
+						parents: severityEntries.map(() => ''),
+						marker: {
+							colors: severityEntries.map(([label], index) => severityPalette[label] || fallbackSeverityColors[index % fallbackSeverityColors.length])
+						},
+						textinfo: 'label+value+percent entry',
+						hovertemplate: '%{label}: %{value}건<extra></extra>'
+					}], {
+						paper_bgcolor: 'rgba(0,0,0,0)',
+						plot_bgcolor: 'rgba(0,0,0,0)',
+						font: { color: '#94a3b8', family: 'Pretendard', size: 16 },
+						hoverlabel: { font: { family: 'Pretendard', size: 18 } },
+						margin: { t: 30, r: 30, l: 30, b: 30 }
+					}, config);
+
+					const gradeValues = gradeOrder.map(g => severityCounts[g] || 0);
 					const gradeTotal = gradeValues.reduce((a, b) => a + b, 0);
-					const gradeTraces = gradeOrder.map((g, i) => ({
-						name: g,
-						x: [gradeValues[i]],
-						y: ['등급'],
-						type: 'bar',
-						orientation: 'h',
-						legendrank: i + 1,
-						marker: { color: gradeColorMap[g] },
-						text: [''],
-						textposition: 'none',
-						hovertemplate: g + ': %{x}건<extra></extra>'
-					}));
+					
 					// 세그먼트 위치 직접 계산 → 좁은 구간은 화살표 선 외부 라벨
 					const minRatio = 0.06;
 					let cumX = 0;
@@ -431,6 +460,7 @@ templ Dashboard(
 						}
 						cumX += val;
 					});
+
 					Plotly.newPlot('severity-half-donut-chart', [{
 						labels: gradeOrder,
 						values: gradeValues,
@@ -454,15 +484,14 @@ templ Dashboard(
 
 					initWeekdayHeatmaps(weekdayHeatmapData, weekdayTypeHeatmapData, weekdayLocationHeatmapData);
 
-					// 색 계산 함수
 					function getTypeColors(values) {
 						const max = Math.max(...values);
-						return values.map(v => `hsl(${240 + (v / max) * 60}, 70%, 50%)`); // 보라색에서 파란색으로
+						return values.map(v => `hsl(${240 + (v / max) * 60}, 70%, 50%)`);
 					}
 
 					function getLocColors(values) {
 						const max = Math.max(...values);
-						return values.map(v => `hsl(${30 + (v / max) * 30}, 70%, 50%)`); // 주황색에서 빨간색으로
+						return values.map(v => `hsl(${30 + (v / max) * 30}, 70%, 50%)`);
 					}
 
 					function getTrendXAxis(periods) {
@@ -479,7 +508,6 @@ templ Dashboard(
 						};
 					}
 
-					// 유형 바 차트
 					if (typeAnalysis.TopTypes) {
 						const topTypeNames = typeAnalysis.TopTypes.map(t => t.Name);
 						const topTypeCounts = typeAnalysis.TopTypes.map(t => t.Count);
@@ -495,7 +523,6 @@ templ Dashboard(
 						}], commonLayout, config);
 					}
 
-					// 유형 라인 차트
 					if (typeAnalysis.TrendData) {
 						const periods = [...new Set(typeAnalysis.TrendData.map(t => t.Period))].sort();
 						const traces = [];
@@ -525,7 +552,6 @@ templ Dashboard(
 						}, config);
 					}
 
-					// 위치 바 차트
 					if (locAnalysis.TopLocations) {
 						const topLocNames = locAnalysis.TopLocations.map(l => l.Name);
 						const topLocCounts = locAnalysis.TopLocations.map(l => l.Count);
@@ -541,7 +567,6 @@ templ Dashboard(
 						}], commonLayout, config);
 					}
 
-					// 위치 라인 차트
 					if (locAnalysis.TrendData) {
 						const periods = [...new Set(locAnalysis.TrendData.map(t => t.Period))].sort();
 						const traces = [];
@@ -571,7 +596,6 @@ templ Dashboard(
 						}, config);
 					}
 
-					// 서버에서 전달받은 activeTab으로 탭 활성화
 					activateTab(store.getAttribute('data-active-tab') || 'timeseries');
 
 					window.onresize = function() {
@@ -588,11 +612,9 @@ templ Dashboard(
 						Plotly.Plots.resize('loc-line-chart');
 					};
 
-					// 전역 변수로 현재 레벨 저장
 					let currentTypeLevel = '{ typeLevel }';
 					let currentLocLevel = '{ locLevel }';
 
-					// 차트 업데이트 함수
 					function updateTypeCharts(analysis) {
 						if (analysis.TopTypes) {
 							const topTypeNames = analysis.TopTypes.map(t => t.Name);
@@ -685,7 +707,6 @@ templ Dashboard(
 						}
 					}
 
-					// 라디오 버튼 변경 함수
 					window.updateTypeLevel = function(level) {
 						currentTypeLevel = level;
 						document.querySelector('input[name="type_level"]').value = level;
@@ -698,19 +719,106 @@ templ Dashboard(
 						fetchAnalysis();
 					};
 
-					// API 호출 함수
+					function updateMTTRTable(mttrByType) {
+						const table = document.getElementById("mttrTable");
+						if (!table) return;
+						const tbody = table.querySelector("tbody");
+						if (!tbody) return;
+
+						// 기존 테이블 내용 비우기
+						tbody.innerHTML = "";
+
+						if (!mttrByType || Object.keys(mttrByType).length === 0) {
+							tbody.innerHTML = `<tr><td colspan="2" class="px-6 py-4 text-center text-slate-500">데이터가 없습니다.</td></tr>`;
+							return;
+						}
+
+						// 데이터를 받아 정렬 상태나 순서 없이 가볍게 뿌려줍니다 (추후 정렬 클릭 시 정렬됨)
+						Object.entries(mttrByType).forEach(([typeName, mttrVal]) => {
+							const row = document.createElement("tr");
+							row.className = "hover:bg-slate-800/50 transition-colors";
+
+							// 소수점 2자리 포맷팅 고정
+							const formattedVal = parseFloat(mttrVal).toFixed(2);
+
+							row.innerHTML = `
+								<td class="px-6 py-4 whitespace-nowrap font-medium text-slate-200">
+									${typeName}
+								</td>
+								<td class="px-6 py-4 whitespace-nowrap text-slate-400 font-mono" data-value="${mttrVal}">
+									${formattedVal} 시간
+								</td>
+							`;
+							tbody.appendChild(row);
+						});
+
+						// 라디오 버튼 전환 시 정렬 아이콘 초기화
+						document.getElementById("sortIcon0").innerText = "";
+						document.getElementById("sortIcon1").innerText = "";
+						mttrSortDirections = [true, true]; // 정렬 방향 상태 초기화
+					}
+
 					function fetchAnalysis() {
 						const params = new URLSearchParams(window.location.search);
 						params.set('type_level', currentTypeLevel);
 						params.set('loc_level', currentLocLevel);
+						
 						fetch('/api/analysis?' + params.toString())
 							.then(response => response.json())
 							.then(data => {
+								// 1. 기존 차트 컴포넌트 업데이트
 								updateTypeCharts(data.typeAnalysis);
 								updateLocCharts(data.locAnalysis);
+								
+								// 2. 동적 분류 단계별 MTTR 테이블 업데이트 추가
+								// API 응답 구조에 맞추어 할당 (예: data.mttrByType 또는 data.typeAnalysis.MTTRByType)
+								if (data.typeAnalysis && data.typeAnalysis.MTTRByType) {
+									updateMTTRTable(data.typeAnalysis.MTTRByType);
+								} else if (data.mttrByType) {
+									updateMTTRTable(data.mttrByType);
+								}
 							})
 							.catch(error => console.error('Error fetching analysis:', error));
 					}
+
+					// 클라이언트 내 테이블 오름차순/내림차순 정렬 토글 상태 배열
+					let mttrSortDirections = [true, true];
+					
+					window.sortMTTRTable = function(columnIndex) {
+						const table = document.getElementById("mttrTable");
+						if (!table) return;
+						const tbody = table.querySelector("tbody");
+						const rows = Array.from(tbody.querySelectorAll("tr"));
+						
+						const isAscending = mttrSortDirections[columnIndex];
+						mttrSortDirections[columnIndex] = !isAscending;
+
+						// 전체 화살표 리셋 후 선택된 열만 변경
+						document.getElementById("sortIcon0").innerText = "";
+						document.getElementById("sortIcon1").innerText = "";
+						document.getElementById(`sortIcon${columnIndex}`).innerText = isAscending ? "▲" : "▼";
+
+						rows.sort((rowA, rowB) => {
+							const cellA = rowA.children[columnIndex];
+							const cellB = rowB.children[columnIndex];
+
+							// 1번째 인덱스(평균 조치 시간)일 경우 data-value 수치값 파싱, 아니면 문자열 트림
+							const valA = columnIndex === 1 ? parseFloat(cellA.getAttribute('data-value')) : cellA.innerText.trim();
+							const valB = columnIndex === 1 ? parseFloat(cellB.getAttribute('data-value')) : cellB.innerText.trim();
+
+							if (typeof valA === 'number' && !isNaN(valA) && typeof valB === 'number' && !isNaN(valB)) {
+								return isAscending ? valA - valB : valB - valA;
+							} else {
+								return isAscending 
+									? String(valA).localeCompare(String(valB), 'ko') 
+									: String(valB).localeCompare(String(valA), 'ko');
+							}
+						});
+
+						// 정렬 완료된 행들을 DOM에 다시 배치
+						rows.forEach(row => tbody.appendChild(row));
+					};
+
 				}, 200);
 			});
 		</script>

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"strings"
 	"time"
 )
 
@@ -15,7 +16,8 @@ type DashboardKPIs struct {
 }
 
 // GetDashboardKPIs: 필터링 및 전체 데이터 분석을 기반으로 주요 KPI를 구합니다.
-func GetDashboardKPIs(filtered []CrisisData, allData []CrisisData) DashboardKPIs {
+// ★ typeLevel 파라미터("대분류", "중분류", "소분류")를 추가로 받습니다.
+func GetDashboardKPIs(filtered []CrisisData, allData []CrisisData, typeLevel string) DashboardKPIs {
 	kpi := DashboardKPIs{
 		TotalCount:   len(filtered),
 		DailyAverage: 0.0,
@@ -57,10 +59,40 @@ func GetDashboardKPIs(filtered []CrisisData, allData []CrisisData) DashboardKPIs
 			resolvedAt, errResolved := parseFlexTime(resolvedRaw)
 			if errResolved == nil && !resolvedAt.Before(occurredAt) {
 				hours := resolvedAt.Sub(occurredAt).Hours()
-				typeKey := d.TypeMain
+
+				// ★ [동적 변경 로직] 선택된 typeLevel 단계에 따라 테이블 키(그룹명) 추출
+				// d.Type의 "대분류>중분류>소분류" 텍스트를 분할 파싱합니다.
+				parts := strings.Split(d.Type, ">")
+				typeKey := ""
+
+				switch typeLevel {
+				case "대분류":
+					if len(parts) > 0 {
+						typeKey = strings.TrimSpace(parts[0])
+					}
+				case "중분류":
+					if len(parts) > 1 {
+						typeKey = strings.TrimSpace(parts[1])
+					} else if len(parts) > 0 {
+						// 중분류 데이터가 비어있을 시 상위 대분류 차용(폴백 처리)
+						typeKey = strings.TrimSpace(parts[0])
+					}
+				case "소분류":
+					if len(parts) > 2 {
+						typeKey = strings.TrimSpace(parts[2])
+					} else if len(parts) > 1 {
+						typeKey = strings.TrimSpace(parts[1])
+					} else if len(parts) > 0 {
+						typeKey = strings.TrimSpace(parts[0])
+					}
+				default:
+					typeKey = d.TypeMain // 기본값 지정
+				}
+
 				if typeKey == "" {
 					typeKey = "기타"
 				}
+
 				mttrSumByType[typeKey] += hours
 				mttrCountByType[typeKey]++
 			}
