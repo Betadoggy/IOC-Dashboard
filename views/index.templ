@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"IOC-Dashboard/handlers"
+	components "IOC-Dashboard/views/components"
 )
 
 // fDay 매개변수가 핸들러에서 넘어온다고 가정하고 구조를 유지합니다. 
@@ -132,57 +133,31 @@ templ Dashboard(
 				<section class="border-t border-slate-800 pt-4 pb-2">
 					<p class="px-2 text-sm font-bold text-slate-500 uppercase mb-3">KPI 지표</p>
 					<div class="space-y-2">
-						<div class="bg-slate-950 rounded-lg px-3 py-3 border border-slate-800 border-l-4 border-l-blue-500">
-							<p class="text-sm text-slate-500 uppercase tracking-normal">전체 건수</p>
-							<p class="text-3xl font-black text-white mt-0.5">{ strconv.Itoa(kpi.TotalCount) }<span class="text-base ml-1 text-slate-500">건</span></p>
-						</div>
-						<div class="bg-slate-950 rounded-lg px-3 py-3 border border-slate-800 border-l-4 border-l-purple-500">
-							<p class="text-sm text-slate-500 uppercase tracking-normal">일 평균 발생</p>
-							<p class="text-3xl font-black text-white mt-0.5">{ fmt.Sprintf("%.1f", kpi.DailyAverage) }<span class="text-base ml-1 text-slate-500">건</span></p>
-						</div>
-						<div class="bg-slate-950 rounded-lg px-3 py-3 border border-slate-800 border-l-4 border-l-orange-500">
-							<p class="text-sm text-slate-500 uppercase tracking-normal">첨두 시간</p>
-							<p class="text-3xl font-black text-white mt-0.5">
-								if kpi.PeakHour != -1 {
-									{ strconv.Itoa(kpi.PeakHour) }
-								} else {
-									-
+						@components.StatCard("전체 건수", "border-l-blue-500", strconv.Itoa(kpi.TotalCount)+"건")
+						@components.StatCard("일 평균 발생", "border-l-purple-500", fmt.Sprintf("%.1f건", kpi.DailyAverage))
+						@components.StatCard("첨두 시간", "border-l-orange-500", func() string {
+							if kpi.PeakHour != -1 {
+								return strconv.Itoa(kpi.PeakHour) + "시"
+							}
+							return "-"
+						}())
+						@components.StatCard("최다 발생 유형 (대분류)", "border-l-emerald-500", kpi.TopType)
+						@components.StatCard("평균 조치 시간 (MTTR)", "border-l-cyan-500", func() string {
+							if len(kpi.MTTRByType) > 0 {
+								sum := 0.0
+								for _, v := range kpi.MTTRByType {
+									sum += v
 								}
-								<span class="text-base ml-1 text-slate-500">시</span>
-							</p>
-						</div>
-						<div class="bg-slate-950 rounded-lg px-3 py-3 border border-slate-800 border-l-4 border-l-emerald-500">
-							<p class="text-sm text-slate-500 uppercase tracking-normal">최다 발생 유형 (대분류)</p>
-							<p class="text-2xl font-black text-white mt-0.5 truncate">{ kpi.TopType }</p>
-						</div>
-						<div class="bg-slate-950 rounded-lg px-3 py-3 border border-slate-800 border-l-4 border-l-cyan-500">
-							<p class="text-sm text-slate-500 uppercase tracking-normal">평균 조치 시간 (MTTR)</p>
-							<p class="text-3xl font-black text-white mt-0.5">
-								if len(kpi.MTTRByType) > 0 {
-									{ fmt.Sprintf("%.1f", func() float64 {
-										sum := 0.0
-										for _, v := range kpi.MTTRByType {
-											sum += v
-										}
-										return sum / float64(len(kpi.MTTRByType))
-									}()) }
-								} else {
-									-
-								}
-								<span class="text-base ml-1 text-slate-500">시간</span>
-							</p>
-						</div>
-						<div class="bg-slate-950 rounded-lg px-3 py-3 border border-slate-800 border-l-4 border-l-rose-500">
-							<p class="text-sm text-slate-500 uppercase tracking-normal">무사고 운영 일수 (심각기준)</p>
-							<p class="text-3xl font-black text-white mt-0.5">
-								if kpi.LTIDays >= 0 {
-									{ fmt.Sprintf("%.1f", kpi.LTIDays) }
-								} else {
-									-
-								}
-								<span class="text-base ml-1 text-slate-500">일</span>
-							</p>
-						</div>
+								return fmt.Sprintf("%.1f시간", sum/float64(len(kpi.MTTRByType)))
+							}
+							return "-"
+						}())
+						@components.StatCard("무사고 운영 일수 (심각기준)", "border-l-rose-500", func() string {
+							if kpi.LTIDays >= 0 {
+								return fmt.Sprintf("%.1f일", kpi.LTIDays)
+							}
+							return "-"
+						}())
 					</div>
 				</section>
 			</nav>
@@ -190,16 +165,8 @@ templ Dashboard(
 
 		<main class="flex-1 overflow-y-auto p-8 bg-slate-950/50">
             <header class="mb-10">
-				<div class="flex flex-wrap gap-2" id="dashboard-tabs">
-					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-blue-600 border-blue-500 text-white" data-tab-target="timeseries">시계열 통계</button>
-					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-slate-900 border-slate-700 text-slate-300" data-tab-target="grade">등급별 통계</button>
-					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-slate-900 border-slate-700 text-slate-300" data-tab-target="type">유형별 통계</button>
-					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-slate-900 border-slate-700 text-slate-300" data-tab-target="location">위치별 통계</button>
-					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-slate-900 border-slate-700 text-slate-300" data-tab-target="weekday">요일별 통계</button>
-					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-slate-900 border-slate-700 text-slate-300" data-tab-target="hourly">시간대별 통계</button>
-					<button type="button" class="dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors bg-slate-900 border-slate-700 text-slate-300" data-tab-target="sankey">분류체계 흐름</button>
-				</div>
-			</header>
+                @components.DashboardTabs(activeTab)
+            </header>
 
 			<section id="tab-panel-timeseries" class="tab-panel space-y-8">
 				<div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">

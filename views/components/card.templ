@@ -1,0 +1,8 @@
+package components
+
+templ StatCard(title string, borderClass string, value string) {
+    <div class={ "bg-slate-950 rounded-lg px-3 py-3 border border-slate-800 border-l-4 ", borderClass }>
+        <p class="text-sm text-slate-500 uppercase tracking-normal">{ title }</p>
+        <p class="text-3xl font-black text-white mt-0.5">{ value }</p>
+    </div>
+}

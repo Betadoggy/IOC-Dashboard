@@ -1,0 +1,17 @@
+package components
+
+templ DashboardTab(target string, active bool, label string) {
+    <button type="button" class={ "dashboard-tab px-4 py-2 rounded-lg border text-base font-semibold transition-colors ", templ.KV("bg-blue-600 border-blue-500 text-white", active), templ.KV("bg-slate-900 border-slate-700 text-slate-300", !active) } data-tab-target={ target }>{ label }</button>
+}
+
+templ DashboardTabs(activeTab string) {
+    <div class="flex flex-wrap gap-2" id="dashboard-tabs">
+        @DashboardTab("timeseries", activeTab == "timeseries", "시계열 통계")
+        @DashboardTab("grade", activeTab == "grade", "등급별 통계")
+        @DashboardTab("type", activeTab == "type", "유형별 통계")
+        @DashboardTab("location", activeTab == "location", "위치별 통계")
+        @DashboardTab("weekday", activeTab == "weekday", "요일별 통계")
+        @DashboardTab("hourly", activeTab == "hourly", "시간대별 통계")
+        @DashboardTab("sankey", activeTab == "sankey", "분류체계 흐름")
+    </div>
+}
